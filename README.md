@@ -17,3 +17,8 @@ to compile contract run code below
 yarn
 yarn compile
 ```
+
+to get abi in each contract
+```
+/artifacts/contracts/<ContractName>/<ContractName>.json
+```
