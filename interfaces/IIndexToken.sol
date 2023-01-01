@@ -37,6 +37,9 @@ interface IIndexToken is IERC20 {
     function controller() external view returns (address);
     function positionMultiplier() external view returns (int256);
 
+    function mint(address _account, uint256 _quantity) external;
+    function burn(address _account, uint256 _quantity) external;
+    
     function invoke(address _target, uint256 _value, bytes calldata _data) external returns(bytes memory);
 
     function addComponent(address _component) external;

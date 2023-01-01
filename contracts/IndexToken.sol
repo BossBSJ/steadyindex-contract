@@ -11,6 +11,7 @@ import {SignedSafeMath} from "@openzeppelin/contracts/utils/math/SignedSafeMath.
 import {IIndexToken} from "../interfaces/IIndexToken.sol";
 import {PreciseUnitMath} from "../libs/PreciseUnitMath.sol";
 import {AddressArrayUtils} from "../libs/AddressArrayUtils.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * @title IndexToken
@@ -81,23 +82,23 @@ contract IndexToken is ERC20 {
     bool public isLocked;
 
     constructor(
-        address[] memory _component,
+        address[] memory _components,
         int256[] memory _units,
         address _controller,
         string memory _name,
         string memory _symbol
     ) public ERC20(_name, _symbol) {
         manager = msg.sender;
-        components = _component;
+        components = _components;
         controller = _controller;
         positionMultiplier = PreciseUnitMath.preciseUnitInt();
 
-        for (uint256 i = 0; i < _component.length; i++) {
-            componentPositions[_component[i]].unit = _units[i];
+        for (uint256 i = 0; i < _components.length; i++) {
+            componentPositions[_components[i]].unit = _units[i];
         }
 
         require(
-            _component.length == _units.length,
+            _components.length == _units.length,
             "Component not match with unit"
         );
     }

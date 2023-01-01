@@ -1,18 +1,54 @@
 import { ethers } from "hardhat";
 
+const tokenAddr = {
+  main: {},
+  test: {
+    weth: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
+    uni: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+  },
+};
+
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying contracts with the account:", deployer.address);
+  console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const Controller = await ethers.getContractFactory("Controller");
+  const controller = await Controller.deploy();
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const MultiAssetSwapper = await ethers.getContractFactory(
+    "MultiAssetSwapper"
+  );
+  const multiAssetSwapper = await MultiAssetSwapper.deploy(
+    "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    controller.address
+  );
 
-  await lock.deployed();
+  const IndexTokenFactory = await ethers.getContractFactory(
+    "IndexTokenFactory"
+  );
+  const indexTokenFactory = await IndexTokenFactory.deploy(controller.address);
 
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  controller.initialize(indexTokenFactory.address, multiAssetSwapper.address);
+
+  indexTokenFactory.createIndexToken(
+    [tokenAddr.test.weth, tokenAddr.test.uni],
+    [1000, 2000],
+    deployer.address,
+    "stIndex",
+    "STI"
+  );
+
+  console.log({
+    controller: controller.address,
+    multiAssetSwapper: multiAssetSwapper.address,
+    indexTokenFactory: indexTokenFactory.address,
+  });
+  console.log( 'for copy to verify contract:\n',
+    controller.address,
+    multiAssetSwapper.address,
+    indexTokenFactory.address
+  );
 }
 
 // We recommend this pattern to be able to use async/await everywhere
@@ -21,3 +57,12 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+// npx hardhat verify --network goerli DEPLOYED_CONTRACT_ADDRESS "Constructor argument 1"
+// npx hardhat verify --network goerli 0xab4FaB62E68f17D39418bd8bf79f298B35284619 "0xE9fa08B395678eca3BD266dbfCB673e821a723E5"
+
+// {
+//   controller: '0xE9fa08B395678eca3BD266dbfCB673e821a723E5',
+//   multiAssetSwapper: '0x5B38086e6D0e2F4703D061847DA2bf4A36269e7e',
+//   indexTokenFactory: '0xab4FaB62E68f17D39418bd8bf79f298B35284619'
+// }
