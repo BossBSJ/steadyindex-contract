@@ -30,7 +30,6 @@ async function main() {
   const indexTokenFactory = await IndexTokenFactory.deploy(controller.address);
 
   await controller.initialize(indexTokenFactory.address, multiAssetSwapper.address);
-
   await indexTokenFactory.createIndexToken(
     [tokenAddr.test.weth, tokenAddr.test.uni],
     [1000, 2000],
