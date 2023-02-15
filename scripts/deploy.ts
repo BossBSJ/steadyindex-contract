@@ -31,13 +31,13 @@ async function main() {
 
   controller.initialize(indexTokenFactory.address, multiAssetSwapper.address);
 
-  indexTokenFactory.createIndexToken(
-    [tokenAddr.test.weth, tokenAddr.test.uni],
-    [1000, 2000],
-    deployer.address,
-    "stIndex",
-    "STI"
-  );
+  // indexTokenFactory.createIndexToken(
+  //   [tokenAddr.test.weth, tokenAddr.test.uni],
+  //   [1000, 2000],
+  //   deployer.address,
+  //   "stIndex",
+  //   "STI"
+  // );
 
   console.log({
     controller: controller.address,
@@ -65,4 +65,13 @@ main().catch((error) => {
 //   controller: '0xE9fa08B395678eca3BD266dbfCB673e821a723E5',
 //   multiAssetSwapper: '0x5B38086e6D0e2F4703D061847DA2bf4A36269e7e',
 //   indexTokenFactory: '0xab4FaB62E68f17D39418bd8bf79f298B35284619'
+// }
+
+// npx hardhat verify --network fuji
+
+// address on fuji
+// {
+//   controller: '0xb0c89b030B1273502849815D8B6F8039A86f414d',
+//   multiAssetSwapper: '0x02488e54c35B0d1B367c4175dDC807F09611bdC0',
+//   indexTokenFactory: '0x363D43aE364e5b02aB464912146b77704b406fDB'
 // }
