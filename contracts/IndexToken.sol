@@ -81,6 +81,8 @@ contract IndexToken is ERC20 {
     // if it lock will be pause to mint/burn
     bool public isLocked;
 
+    uint256 public startBlock;
+
     constructor(
         address[] memory _components,
         int256[] memory _units,
@@ -92,6 +94,7 @@ contract IndexToken is ERC20 {
         components = _components;
         controller = _controller;
         positionMultiplier = PreciseUnitMath.preciseUnitInt();
+        startBlock = block.number;
 
         for (uint256 i = 0; i < _components.length; i++) {
             componentPositions[_components[i]].unit = _units[i];

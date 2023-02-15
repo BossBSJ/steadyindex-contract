@@ -17,3 +17,13 @@ to compile contract run code below
 yarn
 yarn compile
 ```
+then lets verify contract. copy output log from above and run
+```
+./verify.sh <place 3 address here>
+```
+
+to get abi in each contract
+```
+/artifacts/contracts/<ContractName>/<ContractName>.json
+```
+
