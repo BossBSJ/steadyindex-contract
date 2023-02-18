@@ -1,102 +1,190 @@
-// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-pragma solidity 0.8.17;
+import "hardhat/console.sol";
 
-import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
-import {IUniswapV2Router01} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {IMultiAssetSwapper} from "../interfaces/IMultiAssetSwapper.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
-contract MultiAssetSwapper {
-    using SafeMath for uint256;
-    using SafeCast for int256;
-    using SafeCast for uint256;
+// uniswapRouter 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+// weth 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6
 
-    /* ============ Event ============ */
-    event Swapper(
-        address _indexToken,
-        address[] _tokens,
-        uint256[] _ethAmounts,
-        uint256[] _amoutOuts
-    );
-
+contract MultiAssetSwapper is IMultiAssetSwapper {
     /* ============ Modifier ============ */
-
-    modifier onlyController() {
-        _validateOnlyController();
+    modifier onlyAdmin() {
+        _validateOnlyAdmin();
         _;
     }
 
     /* ============ State Variables ============ */
+    address public admin;
+    IUniswapV2Router02 public router;
+    address public WRAP_NATIVE_ADDR;
 
-    IUniswapV2Router01 public router;
-    address public controller;
+    /* ============ Functions ============ */
 
-    constructor(IUniswapV2Router01 _router, address _controller) public {
-        router = _router;
-        controller = _controller;
+    constructor(address _uniswapRouter, address _wethAddr) {
+        admin = msg.sender;
+        router = IUniswapV2Router02(_uniswapRouter);
+        WRAP_NATIVE_ADDR = _wethAddr;
     }
 
-    function swaper(
-        address[] calldata _tokens,
-        uint256[] calldata _ethAmounts,
-        address[][] memory paths,
-        uint256[] calldata _amountOutMins,
-        address _indexToken
-    ) public payable onlyController {
-        // Ensure that the contract has sufficient ETH to complete the swap
+    /* ============ External Functions ============ */
+    function swapMultiTokensForToken(
+        address[] memory _tokenIns,
+        uint256[] memory _amountIns,
+        uint256 _minAmountOut,
+        address _tokenOut,
+        address _receiver
+    ) public payable {
         require(
-            _isEthAmountsEqEthValue(_ethAmounts, msg.value),
-            "ETH value mismatch"
+            _tokenIns.length == _amountIns.length,
+            "Invalid input parameters"
         );
 
-        uint256[] memory _amoutOuts = new uint256[](_tokens.length);
+        uint256 totalAmount = 0;
+        for (uint256 i = 0; i < _tokenIns.length; i++) {
+            IERC20 token = IERC20(_tokenIns[i]);
+            uint256 allowance = token.allowance(msg.sender, address(this));
+            require(allowance >= _amountIns[i], "Insufficient token allowance");
 
-        // Perform the swap on Uniswap
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            uint256[] memory resultAmounts = router.swapExactETHForTokens{
-                value: msg.value
-            }(
-                _amountOutMins[i], // amountOutMin
-                paths[i], // path
-                address(this), // to
-                _deadline() // deadline
-            );
-
-            // Ensure that the swap was successful
+            totalAmount += _amountIns[i];
             require(
-                resultAmounts[resultAmounts.length - 1] >= _amountOutMins[i],
-                string.concat(
-                    string("Swap failed at token address: "),
-                    Strings.toHexString(uint256(uint160(_tokens[i])), 20)
-                )
+                token.transferFrom(msg.sender, address(this), _amountIns[i]),
+                "Failed to transfer tokens, tokenIns"
             );
-
-            _amoutOuts[i] = resultAmounts[resultAmounts.length - 1];
         }
 
-        emit Swapper(_indexToken, _tokens, _ethAmounts, _amoutOuts);
+        for (uint256 i = 0; i < _tokenIns.length; i++) {
+            _approveTokenForSpender(
+                _tokenIns[i],
+                address(router),
+                _amountIns[i]
+            );
+        }
+
+        address[] memory path = new address[](3);
+        uint256 amountOut = 0;
+        for (uint256 i = 0; i < _tokenIns.length; i++) {
+            path[0] = _tokenIns[i];
+            path[1] = WRAP_NATIVE_ADDR;
+            path[2] = _tokenOut;
+
+            uint256 receivedAmount = router.swapExactTokensForTokens(
+                _amountIns[i],
+                0,
+                path,
+                _receiver,
+                block.timestamp + 60
+            )[1];
+
+            require(
+                receivedAmount > 0,
+                "Invalid received amount, Swap tokenIn"
+            );
+
+            amountOut += receivedAmount;
+        }
+        require(amountOut > _minAmountOut, "Invalid amount out");
+    }
+
+    function swapTokenForMultiTokens(
+        address _tokenIn,
+        uint256 _amountIn,
+        uint256[] memory _amountOuts,
+        address[] memory _tokenOuts,
+        address _receiver
+    ) public payable {
+        // Check parameter
+        require(
+            _tokenOuts.length == _amountOuts.length,
+            "Invalid input parameters"
+        );
+
+        //  Check tokenIn allowance
+        IERC20 tokenIn = IERC20(_tokenIn);
+        // uint256 allowance = tokenIn.allowance(msg.sender, address(this));
+        // require(allowance >= amountTokenIn, "Insufficient token allowance");
+
+        // Transfer tokenIn to this contract
+        require(
+            tokenIn.transferFrom(msg.sender, address(this), _amountIn),
+            "Failed to transfer tokens, tokenIn"
+        );
+
+        console.log(
+            "Balance in multiSwap: %s",
+            tokenIn.balanceOf(address(this))
+        );
+
+        // Approve tokenIn for uniswap
+        _approveTokenForSpender(_tokenIn, address(router), _amountIn);
+
+        // Swap tokenIn to tokenOuts
+        address[] memory path = new address[](3);
+        uint256 totalAmountInUsed = 0;
+        path[0] = _tokenIn;
+        path[1] = WRAP_NATIVE_ADDR;
+        console.log("");
+        for (uint256 i = 0; i < _tokenOuts.length; i++) {
+            console.log(
+                "Swaping %s, balance: %s",
+                i,
+                tokenIn.balanceOf(address(this))
+            );
+            path[2] = _tokenOuts[i];
+
+            console.log(
+                "Calculate will use: %s",
+                router.getAmountsIn(_amountOuts[i], path)[0]
+            );
+            console.log(
+                "Calculate ETH use: %s",
+                router.getAmountsIn(_amountOuts[i], path)[1]
+            );
+
+            uint256 amountInUsed = router.swapTokensForExactTokens(
+                _amountOuts[i],
+                _amountIn,
+                path,
+                _receiver,
+                block.timestamp + 60
+            )[0];
+            console.log("swaped %s with use %s", i, amountInUsed);
+            totalAmountInUsed += amountInUsed;
+            console.log("");
+        }
+        console.log("balance: %s", _amountIn - totalAmountInUsed);
+        require(_amountIn >= totalAmountInUsed, "Invalid amount in");
+    }
+
+    function withdrawToken(address _token, uint256 _amount) public onlyAdmin {
+        IERC20 token = IERC20(_token);
+        require(
+            token.transfer(msg.sender, _amount),
+            "Failed to withdraw tokens"
+        );
+    }
+
+    function withdrawEth(uint256 _amount) public onlyAdmin {
+        payable(msg.sender).transfer(_amount);
     }
 
     /* ============ Internal Functions ============ */
 
-    function _deadline() private view returns (uint256) {
-        return block.timestamp + 10 minutes;
+    function _approveTokenForSpender(
+        address _token,
+        address _spender,
+        uint256 _amount
+    ) private {
+        IERC20 token = IERC20(_token);
+        require(
+            token.approve(_spender, _amount),
+            "Failed to approve token for spender"
+        );
     }
 
-    function _isEthAmountsEqEthValue(
-        uint256[] calldata _amounts,
-        uint256 _value
-    ) private pure returns (bool) {
-        uint256 totalAmount = 0;
-        for (uint256 i = 0; i < _amounts.length; i++) {
-            totalAmount += _amounts[i];
-        }
-        return totalAmount == _value;
-    }
-
-    function _validateOnlyController() internal view {
-        require(msg.sender == controller, "Only controller can call");
+    function _validateOnlyAdmin() internal view {
+        require(msg.sender == admin, "Only admin can call");
     }
 }

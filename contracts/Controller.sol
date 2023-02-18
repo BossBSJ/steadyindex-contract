@@ -4,8 +4,14 @@ pragma solidity 0.8.17;
 
 import {IMultiAssetSwapper} from "../interfaces/IMultiAssetSwapper.sol";
 import {IIndexToken} from "../interfaces/IIndexToken.sol";
+import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+
+import "hardhat/console.sol";
 
 contract Controller {
+    using SafeMath for uint256;
     /* ============ Events ============ */
 
     event AdminEdited(address _admin, address _oldAdmin);
@@ -34,7 +40,7 @@ contract Controller {
     mapping(address => bool) isIndex;
 
     /* ============ Functions ============ */
-    constructor() public {
+    constructor() {
         admin = msg.sender;
     }
 
@@ -48,21 +54,82 @@ contract Controller {
         multiAssetSwaper = _multiAssetSwaper;
     }
 
-    function issueIndexToken(IIndexToken _indexToken, uint256 _amount)
-        external
-        payable
-    {
-        _indexToken.mint(msg.sender, _amount);
+    function issueIndexToken(
+        address _indexToken,
+        uint256 _indexTokenAmount,
+        address _tokenIn,
+        address _to
+    ) external {
+        require(isIndex[_indexToken], "Index doesn't exists");
+        IIndexToken indexToken = IIndexToken(_indexToken);
+        IERC20 tokenIn = IERC20(_tokenIn);
+        (
+            uint256 tokenInAmount,
+            address[] memory tokenOuts,
+            uint256[] memory amountOuts
+        ) = getAmountInForIndexToken(_indexToken, _indexTokenAmount, _tokenIn);
+        require(
+            tokenIn.transferFrom(msg.sender, address(this), tokenInAmount),
+            "Failed to transfer tokens"
+        );
+
+        console.log(
+            "Balance in controller: %s",
+            tokenIn.balanceOf(address(this))
+        );
+
+        _approveTokenForSpender(
+            _tokenIn,
+            address(multiAssetSwaper),
+            tokenInAmount
+        );
+
+        multiAssetSwaper.swapTokenForMultiTokens(
+            _tokenIn,
+            tokenInAmount,
+            amountOuts,
+            tokenOuts,
+            _indexToken
+        );
+
+        indexToken.mint(_to, _indexTokenAmount);
     }
 
-    function redeemIndexToken(IIndexToken _indexToken, uint256 _amount)
-        external
-    {
-        require(isIndex[address(_indexToken)], "Index doesn't exists");
-        // require(_indexToken.allowance(msg.sender, address(this)) >= _amount, "Insufficient allowance");
+    function redeemIndexToken(
+        address _indexToken,
+        uint256 _indexTokenAmount,
+        address _tokenOut,
+        uint256 _minAmountOut,
+        address _to
+    ) external {
+        IIndexToken indexToken = IIndexToken(_indexToken);
+        require(isIndex[_indexToken], "Index doesn't exists");
+        require(
+            indexToken.allowance(msg.sender, address(this)) >=
+                _indexTokenAmount,
+            "Insufficient allowance"
+        );
+        (address[] memory tokenIns, uint256[] memory amountIns) = indexToken
+            .getComponentsForIndex(_indexTokenAmount);
 
-        _indexToken.transferFrom(msg.sender, address(this), _amount);
-        _indexToken.burn(address(this), _amount);
+        indexToken.transferFrom(msg.sender, address(this), _indexTokenAmount);
+        indexToken.burn(address(this), _indexTokenAmount);
+
+        for (uint256 i = 0; i < tokenIns.length; i++) {
+            _approveTokenForSpender(
+                tokenIns[i],
+                address(multiAssetSwaper),
+                amountIns[i]
+            );
+        }
+
+        multiAssetSwaper.swapMultiTokensForToken(
+            tokenIns,
+            amountIns,
+            _minAmountOut,
+            _tokenOut,
+            _to
+        );
     }
 
     function setAdmin(address _admin) external onlyAdmin {
@@ -76,7 +143,63 @@ contract Controller {
         isIndex[_indexToken] = true;
     }
 
+    function getAmountInForIndexToken(
+        address _indexToken,
+        uint256 _indexTokenAmount,
+        address _tokenIn
+    )
+        public
+        view
+        returns (
+            uint256 tokenInAmount,
+            address[] memory tokenOuts,
+            uint256[] memory amountOuts
+        )
+    {
+        IIndexToken indexToken = IIndexToken(_indexToken);
+        (tokenOuts, amountOuts) = indexToken.getComponentsForIndex(
+            _indexTokenAmount
+        );
+
+        address WRAP_NATIVE_ADDR = multiAssetSwaper.WRAP_NATIVE_ADDR();
+        IUniswapV2Router02 router = IUniswapV2Router02(
+            multiAssetSwaper.router()
+        );
+
+        address[] memory path = new address[](2);
+        uint256 amountWrap = 0;
+
+        for (uint256 i = 0; i < tokenOuts.length; i++) {
+            path[0] = WRAP_NATIVE_ADDR;
+            path[1] = tokenOuts[i];
+
+            uint256[] memory amountIns = router.getAmountsIn(
+                amountOuts[i],
+                path
+            );
+
+            uint256 amountIn = amountIns[0];
+            amountWrap += amountIn;
+        }
+        path[0] = _tokenIn;
+        path[1] = WRAP_NATIVE_ADDR;
+        uint256 _tokenInAmount = router.getAmountsIn(amountWrap, path)[0];
+        tokenInAmount = _tokenInAmount.add(_tokenInAmount.div(400));
+    }
+
     /* ============ Internal Functions ============ */
+
+    function _approveTokenForSpender(
+        address _token,
+        address _spender,
+        uint256 _amount
+    ) private {
+        IERC20 token = IERC20(_token);
+        require(
+            token.approve(_spender, _amount),
+            "Failed to approve token for spender"
+        );
+    }
 
     function _validateOnlyAdmin() internal view {
         require(msg.sender == admin, "Only admin can call");

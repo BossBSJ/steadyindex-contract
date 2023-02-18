@@ -27,3 +27,9 @@ to get abi in each contract
 /artifacts/contracts/<ContractName>/<ContractName>.json
 ```
 
+# Document
+### Role
+#### IndexToken contract
+- Manager : who can manage an index
+- Controller : contract which only one can take action to indexToken
+

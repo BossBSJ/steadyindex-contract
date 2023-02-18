@@ -12,5 +12,5 @@ interface IIndexTokenFactory {
         string memory _symbol
     ) external returns (address);
 
-    function getIndexTokens() external view returns (address[] memory);
+    function getIndexs() external view returns (address[] memory);
 }

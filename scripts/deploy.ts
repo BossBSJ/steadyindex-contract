@@ -14,24 +14,25 @@ async function main() {
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
   const Controller = await ethers.getContractFactory("Controller");
-  const controller = await Controller.deploy();
-
   const MultiAssetSwapper = await ethers.getContractFactory(
     "MultiAssetSwapper"
   );
+  const IndexTokenFactory = await ethers.getContractFactory(
+    "IndexTokenFactory"
+  );
+
+  const controller = await Controller.deploy();
   const multiAssetSwapper = await MultiAssetSwapper.deploy(
     "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
     controller.address
   );
-
-  const IndexTokenFactory = await ethers.getContractFactory(
-    "IndexTokenFactory"
-  );
   const indexTokenFactory = await IndexTokenFactory.deploy(controller.address);
 
-  controller.initialize(indexTokenFactory.address, multiAssetSwapper.address);
-
-  // indexTokenFactory.createIndexToken(
+  await controller.initialize(
+    indexTokenFactory.address,
+    multiAssetSwapper.address
+  );
+  // await indexTokenFactory.createIndexToken(
   //   [tokenAddr.test.weth, tokenAddr.test.uni],
   //   [1000, 2000],
   //   deployer.address,
@@ -44,7 +45,8 @@ async function main() {
     multiAssetSwapper: multiAssetSwapper.address,
     indexTokenFactory: indexTokenFactory.address,
   });
-  console.log( 'for copy to verify contract:\n',
+  console.log(
+    "for copy to verify contract:\n",
     controller.address,
     multiAssetSwapper.address,
     indexTokenFactory.address
