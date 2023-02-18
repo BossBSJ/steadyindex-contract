@@ -1,24 +1,11 @@
-import { ethers, network } from "hardhat";
-import {
-  MyAddr,
-  tokenA,
-  tokenB,
-  tokenC,
-  uniswapRouterAddr,
-  wethAddr,
-} from "./constant";
-import {
-  Controller,
-  IUniswapV2Router02,
-  IndexToken,
-  SimpleToken__factory,
-} from "../typechain-types";
+import hre from "hardhat";
+import { MyAddr, toE18, tokenA, tokenB, tokenC, wethAddr } from "./constant";
+import { Controller, IUniswapV2Router02, IndexToken } from "../typechain-types";
 import { expect } from "chai";
-import BigNumber from "bignumber.js";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { centralFixture } from "./shares/fixtures";
 
-describe.only("Controller", () => {
+describe("Controller", () => {
   let firstIndex: IndexToken;
   let controller: Controller;
   let deployer: SignerWithAddress;
@@ -27,6 +14,42 @@ describe.only("Controller", () => {
   const components = {
     A: { addr: tokenA, unit: 25e10 },
     B: { addr: tokenB, unit: 75e10 },
+  };
+
+  const issueIndexToken = async () => {
+    const { addrApproveTokenForSpender } = await centralFixture();
+    const [wethAmountIn1, wethAmountIn2] = await Promise.all([
+      (
+        await uniswapRouter.getAmountsIn(components.A.unit, [wethAddr, tokenA])
+      )[0],
+      (
+        await uniswapRouter.getAmountsIn(components.B.unit, [wethAddr, tokenB])
+      )[0],
+    ]);
+    const _amountIn = (
+      await uniswapRouter.getAmountsIn(wethAmountIn1.add(wethAmountIn2), [
+        tokenC,
+        wethAddr,
+      ])
+    )[0];
+    const amountIn = _amountIn.add(_amountIn.div(400));
+
+    // console.log("Expect to use: ", amountIn.toString());
+
+    await addrApproveTokenForSpender(
+      tokenC,
+      controller.address,
+      amountIn.toString()
+    );
+
+    await controller.issueIndexToken(
+      firstIndex.address,
+      toE18(1),
+      tokenC,
+      deployer.address
+    );
+
+    return { amountIn };
   };
 
   before(async () => {
@@ -45,84 +68,103 @@ describe.only("Controller", () => {
     await indexTokenFactory.createIndexToken(
       [components.A.addr, components.B.addr],
       [components.A.unit, components.B.unit],
-      [new BigNumber("25e18").toString(), new BigNumber("75e18").toString()],
+      [toE18(25), toE18(75)],
       MyAddr,
       "FirstIndex",
       "IDX"
     );
-    firstIndex = await ethers.getContractAt(
+    firstIndex = await hre.ethers.getContractAt(
       "IndexToken",
       await indexTokenFactory.indexTokens(0)
     );
   });
 
   it("issueIndexToken", async () => {
+    const { getTokensBalanceOf } = await centralFixture();
+
+    const [_tokenCBal, _firstIdxBal] = await getTokensBalanceOf([
+      tokenC,
+      firstIndex.address,
+    ]);
+
+    const { amountIn } = await issueIndexToken();
+
+    const [tokenCBal, firstIdxBal] = await getTokensBalanceOf([
+      tokenC,
+      firstIndex.address,
+    ]);
+
+    expect(tokenCBal, "tokenC balance").to.equal(_tokenCBal.sub(amountIn));
+    expect(firstIdxBal, "firstIndex balance").to.equal(
+      _firstIdxBal.add(toE18(1))
+    );
+  });
+
+  it("redeemIndexToken all balance", async () => {
     const { getTokensBalanceOf, addrApproveTokenForSpender } =
       await centralFixture();
 
-    const [_tokenABal, _tokenBBal, _tokenCBal] = await getTokensBalanceOf([
-      tokenA,
-      tokenB,
+    await issueIndexToken();
+    
+    const [_tokenCBal, _firstIdxBal] = await getTokensBalanceOf([
       tokenC,
+      firstIndex.address,
     ]);
 
-    const [wethAmountIn1, wethAmountIn2] = await Promise.all([
-      (
-        await uniswapRouter.getAmountsIn(components.A.unit, [wethAddr, tokenA])
-      )[0],
-      (
-        await uniswapRouter.getAmountsIn(components.B.unit, [wethAddr, tokenB])
-      )[0],
-    ]);
-    const _amountIn = (
-      await uniswapRouter.getAmountsIn(wethAmountIn1.add(wethAmountIn2), [
-        tokenC,
-        wethAddr,
-      ])
-    )[0];
-    const amountIn = _amountIn.add(_amountIn.div(400))
-
-    // const c1 = await uniswapRouter.getAmountIn(
-    //   wethAmountIn1,
-    //   "25000000000000000000",
-    //   "100000000000000"
-    // );
-    // const c2 = await uniswapRouter.getAmountIn(
-    //   wethAmountIn2,
-    //   new BigNumber("25000000000000000000").plus(c1.toString()).toString(),
-    //   new BigNumber("100000000000000")
-    //     .minus(wethAmountIn1.toString())
-    //     .toString()
-    // );
-
-    // const cc = await uniswapRouter.getAmountIn(
-    //   wethAmountIn1.add(wethAmountIn2),
-    //   "25000000000000000000",
-    //   "100000000000000"
-    // );
-    // console.log("expect tokenC use", c1.toString(), c2.toString(), cc.toString());
-
-    console.log("Expect to use: ", amountIn.toString());
-
-    await addrApproveTokenForSpender(
-      tokenC,
+    await addrApproveTokenForSpender(  
+      firstIndex.address,
       controller.address,
-      amountIn.toString()
+      _firstIdxBal.toString()
     );
 
-    await controller.issueIndexToken(
+    await controller.redeemIndexToken(
       firstIndex.address,
-      new BigNumber("1e18").toString(),
+      _firstIdxBal,
       tokenC,
+      0,
       deployer.address
     );
 
-    const [tokenABal, tokenBBal, tokenCBal] = await getTokensBalanceOf([
-      tokenA,
-      tokenB,
+    const [tokenCBal, firstIdxBal] = await getTokensBalanceOf([
       tokenC,
+      firstIndex.address,
     ]);
 
-    expect(tokenCBal, "tokenC").to.equal(_tokenCBal.sub(amountIn));
+    expect(firstIdxBal, "firstIndex balance ").to.equal("0");
+    console.log(tokenCBal);
+    expect(tokenCBal, "tokenC balance").to.greaterThan(_tokenCBal);
+  });
+
+  it("redeemIndexToken half balance", async () => {
+    const { getTokensBalanceOf, addrApproveTokenForSpender } =
+      await centralFixture();
+
+    await issueIndexToken();
+    const [_tokenCBal, _firstIdxBal] = await getTokensBalanceOf([
+      tokenC,
+      firstIndex.address,
+    ]);
+
+    await addrApproveTokenForSpender(
+      firstIndex.address,
+      controller.address,
+      _firstIdxBal.toString()
+    );
+
+    await controller.redeemIndexToken(
+      firstIndex.address,
+      _firstIdxBal.div(2),
+      tokenC,
+      0,
+      deployer.address
+    );
+
+    const [tokenCBal, firstIdxBal] = await getTokensBalanceOf([
+      tokenC,
+      firstIndex.address,
+    ]);
+
+    expect(firstIdxBal, "firstIndex balance ").to.equal(_firstIdxBal.div(2));
+    expect(tokenCBal, "tokenC balance").to.greaterThan(_tokenCBal);
   });
 });

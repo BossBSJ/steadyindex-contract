@@ -5,6 +5,7 @@ pragma experimental "ABIEncoderV2";
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {SignedSafeMath} from "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
@@ -147,8 +148,6 @@ contract IndexToken is ERC20 {
     //     return _returnValue;
     // }
 
-    
-
     /**
      * PRIVELEGED MANAGER FUNCTION. Low level function that adds a component to the components array.
      */
@@ -202,6 +201,18 @@ contract IndexToken is ERC20 {
         onlyController
         whenUnlock
     {
+        (
+            address[] memory componentAddrs,
+            uint256[] memory units
+        ) = getComponentsForIndex(_quantity);
+
+        for (uint256 i = 0; i < componentAddrs.length; i++) {
+            require(
+                IERC20(componentAddrs[i]).transfer(_account, units[i]),
+                "Failed to transfer"
+            );
+        }
+
         _burn(_account, _quantity);
     }
 
@@ -286,7 +297,7 @@ contract IndexToken is ERC20 {
         return positions;
     }
 
-    function getComponentsNeedForIndex(uint256 _amount)
+    function getComponentsForIndex(uint256 _amount)
         public
         view
         returns (address[] memory, uint256[] memory)

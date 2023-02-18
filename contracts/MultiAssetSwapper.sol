@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import "hardhat/console.sol";
 
 import {IMultiAssetSwapper} from "../interfaces/IMultiAssetSwapper.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 
 // uniswapRouter 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D

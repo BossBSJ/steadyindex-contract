@@ -32,7 +32,7 @@ describe("MultiAssetSwapper", () => {
 
   it("swapMultiTokensForToken", async () => {
     const { getTokensBalanceOf } = await centralFixture();
-    
+
     const [_tokenABal, _tokenBBal, _tokenCBal] = await getTokensBalanceOf([
       tokenA,
       tokenB,
@@ -60,9 +60,11 @@ describe("MultiAssetSwapper", () => {
       tokenB,
       tokenC,
     ]);
-    expect(_tokenABal.sub(1e10)).to.equal(tokenABal);
-    expect(_tokenBBal.sub(2e10)).to.equal(tokenBBal);
-    expect(_tokenCBal.add(expectOutCFromWeth)).to.equal(tokenCBal);
+    expect(_tokenABal.sub(1e10), "tokenA balance").to.equal(tokenABal);
+    expect(_tokenBBal.sub(2e10), "tokenB balance").to.equal(tokenBBal);
+    expect(_tokenCBal.add(expectOutCFromWeth), "tokenC balance").to.equal(
+      tokenCBal
+    );
   });
 
   it("swapTokenForMultiTokens", async () => {
@@ -97,8 +99,8 @@ describe("MultiAssetSwapper", () => {
       tokenB,
       tokenC,
     ]);
-    expect(_tokenABal.add(1e10), "tokenA").to.equal(tokenABal);
-    expect(_tokenBBal.add(12e9), "tokenB").to.equal(tokenBBal);
-    expect(_tokenCBal.sub(amountIn), "tokenC").to.equal(tokenCBal);
+    expect(_tokenABal.add(1e10), "tokenA balance").to.equal(tokenABal);
+    expect(_tokenBBal.add(12e9), "tokenB balance").to.equal(tokenBBal);
+    expect(_tokenCBal.sub(amountIn), "tokenC balance").to.equal(tokenCBal);
   });
 });

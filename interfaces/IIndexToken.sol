@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.0;
 pragma experimental "ABIEncoderV2";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -58,5 +58,5 @@ interface IIndexToken is IERC20 {
     function getAllPositionUnit() external view returns(int256);
     function getPositionRatio(address _component) external view returns(int256);
     function getPositions() external view returns (Position[] memory);
-    function getComponentsNeedForIndex(uint256 _amount) external view returns (address[] memory, uint256[] memory);
+    function getComponentsForIndex(uint256 _amount) external view returns (address[] memory, uint256[] memory);
 }

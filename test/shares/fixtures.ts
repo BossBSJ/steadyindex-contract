@@ -24,6 +24,8 @@ export async function centralFixture() {
     await hre.ethers.getContractFactory("IndexTokenFactory")
   ).deploy(controller.address);
 
+  const dcaManager = await(await hre.ethers.getContractFactory('DCAManager')).deploy(deployer.address, controller.address)
+
   async function getTokensBalanceOf(
     tokenAddrs: string[],
     accountAddr: string = deployer.address
@@ -52,6 +54,7 @@ export async function centralFixture() {
     ERC20,
     controller,
     indexTokenFactory,
+    dcaManager,
     getTokensBalanceOf,
     addrApproveTokenForSpender
   };
