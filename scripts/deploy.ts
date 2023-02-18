@@ -67,11 +67,12 @@ main().catch((error) => {
 //   indexTokenFactory: '0xab4FaB62E68f17D39418bd8bf79f298B35284619'
 // }
 
+// npx hardhat run --network fuji scripts/deploy.ts
 // npx hardhat verify --network fuji
 
 // address on fuji
 // {
-//   controller: '0xb0c89b030B1273502849815D8B6F8039A86f414d',
-//   multiAssetSwapper: '0x02488e54c35B0d1B367c4175dDC807F09611bdC0',
-//   indexTokenFactory: '0x363D43aE364e5b02aB464912146b77704b406fDB'
+//   controller: '0xF1401846ffb3758B79D4f4a40aF76a9C53CD10b7',
+//   multiAssetSwapper: '0x4470Cf8282FD95F3f3945DF0Eb45D426aD117f0a',
+//   indexTokenFactory: '0x29Cf4B7f226e6933adf7659ACF6C5be9322A591F'
 // }
