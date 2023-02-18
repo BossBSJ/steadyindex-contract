@@ -20,15 +20,17 @@ interface IIndexToken is IERC20 {
      */
     struct Position {
         address component;
-        int256 unit;
+        uint256 unit;
         int256 ratio;
     }
 
     /**
      * @param unit             value of a components' default position (when initail)
+     * @param strategicUnit    value of a components' ratio in strategic which sum of all component == 100e18
      */
     struct ComponentPosition {
-        int256 unit;
+        uint256 unit;
+        uint256 strategicUnit;
     }
 
     /* ============ Functions ============ */
@@ -44,7 +46,7 @@ interface IIndexToken is IERC20 {
 
     function addComponent(address _component) external;
     function removeComponent(address _component) external;
-    function editPositionUnit(address _component, int256 _realUnit) external;
+    function editDefaultPositionUnit(address _component, int256 _realUnit) external;
 
     function lock() external;
     function unlock() external;
@@ -56,5 +58,5 @@ interface IIndexToken is IERC20 {
     function getAllPositionUnit() external view returns(int256);
     function getPositionRatio(address _component) external view returns(int256);
     function getPositions() external view returns (Position[] memory);
-
+    function getComponentsNeedForIndex(uint256 _amount) external view returns (address[] memory, uint256[] memory);
 }

@@ -7,6 +7,8 @@ import {IndexToken} from "./IndexToken.sol";
 import {IController} from "../interfaces/IController.sol";
 import {AddressArrayUtils} from "../libs/AddressArrayUtils.sol";
 
+import "hardhat/console.sol";
+
 contract IndexTokenFactory {
     using AddressArrayUtils for address[];
 
@@ -25,13 +27,14 @@ contract IndexTokenFactory {
     IController public controller;
     address[] public indexTokens;
 
-    constructor(IController _controller) public {
+    constructor(IController _controller) {
         controller = _controller;
     }
 
     function createIndexToken(
         address[] memory _components,
-        int256[] memory _units,
+        uint256[] memory _units,
+        uint256[] memory _strategicUnit,
         address _manager,
         string memory _name,
         string memory _symbol
@@ -54,21 +57,22 @@ contract IndexTokenFactory {
         IndexToken indexToken = new IndexToken(
             _components,
             _units,
-            address(controller),
+            _strategicUnit,
+            _manager,
             _name,
-            _symbol
+            _symbol,
+            address(controller)
         );
 
         address _indexToken = address(indexToken);
+
         indexTokens.push(_indexToken);
         controller.addIndex(_indexToken);
-
         emit IndexTokenCreated(_indexToken, _manager, _name, _symbol);
-
         return _indexToken;
     }
 
-    function getIndexTokens() public view returns(address[] memory) {
+    function getIndexs() public view returns (address[] memory) {
         return indexTokens;
     }
 }

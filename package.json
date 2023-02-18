@@ -6,7 +6,8 @@
   "license": "MIT",
   "scripts": {
     "compile": "./clean.sh && npx hardhat compile",
-    "deploy:testnet" : "npx hardhat run scripts/deploy.ts --network goerli"
+    "deploy:testnet": "npx hardhat run scripts/deploy.ts --network goerli",
+    "debug": "npx hardhat run scripts/debug.ts --network goerli"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
@@ -23,7 +24,7 @@
     "@types/node": "^18.11.18",
     "chai": "^4.3.7",
     "ethers": "^5.4.7",
-  "hardhat": "^2.12.5",
+    "hardhat": "^2.12.5",
     "hardhat-gas-reporter": "^1.0.8",
     "solidity-coverage": "^0.8.0",
     "ts-node": ">=8.0.0",
@@ -32,6 +33,8 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.0",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0"
+    "@traderjoe-xyz/core": "^2.4.6",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "bignumber.js": "^9.1.1"
   }
 }
