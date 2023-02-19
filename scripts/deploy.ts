@@ -34,6 +34,8 @@ async function main() {
     "IDX"
   );
 
+  const firstIndex = await fixture.getIndexToken(0);
+
   console.log({
     controller: fixture.controller.address,
     multiAssetSwapper: fixture.multiAssetSwapper.address,
@@ -48,7 +50,8 @@ async function main() {
     fixture.dcaManager.address,
     fixture.router.address,
     fixture.addresses.wavax,
-    fixture.deployer.address
+    fixture.deployer.address,
+    firstIndex.address
   );
 }
 
