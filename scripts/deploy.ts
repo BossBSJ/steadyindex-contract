@@ -8,54 +8,54 @@ async function main() {
     A: { addr: avalancheTestnet.tokenA, unit: 25e6 },
     B: { addr: avalancheTestnet.tokenB, unit: 75e6 },
   };
-  (await ethers.getContractAt("IndexTokenFactory", "0xae7b1530cb79748c878f44fe7e8289f09c9edb45")).createIndexToken(
-    [components.A.addr, components.B.addr],
-    [components.A.unit, components.B.unit],
-    [toE18(25), toE18(75)],
-    MyAddr,
-    "FirstIndex",
-    "IDX"
-  );
-
-  // const fixture = await centralFixture(avalancheTestnet);
-
-  // console.log(
-  //   "Deploying contracts with the account:",
-  //   fixture.deployer.address
-  // );
-  // console.log(
-  //   "Account balance:",
-  //   (await fixture.deployer.getBalance()).toString()
-  // );
-
-  
-
-  // await fixture.initController();
-  // await fixture.indexTokenFactory.createIndexToken(
+  // (await ethers.getContractAt("IndexTokenFactory", "0xae7b1530cb79748c878f44fe7e8289f09c9edb45")).createIndexToken(
   //   [components.A.addr, components.B.addr],
   //   [components.A.unit, components.B.unit],
   //   [toE18(25), toE18(75)],
-  //   fixture.deployer.address,
+  //   MyAddr,
   //   "FirstIndex",
   //   "IDX"
   // );
 
-  // console.log({
-  //   controller: fixture.controller.address,
-  //   multiAssetSwapper: fixture.multiAssetSwapper.address,
-  //   indexTokenFactory: fixture.indexTokenFactory.address,
-  // });
-  // console.log(
-  //   "for copy to verify contract:\n",
-  //   "./verify.sh ",
-  //   fixture.controller.address,
-  //   fixture.multiAssetSwapper.address,
-  //   fixture.indexTokenFactory.address,
-  //   fixture.dcaManager.address,
-  //   fixture.router.address,
-  //   fixture.addresses.wavax,
-  //   fixture.deployer.address
-  // );
+  const fixture = await centralFixture(avalancheTestnet);
+
+  console.log(
+    "Deploying contracts with the account:",
+    fixture.deployer.address
+  );
+  console.log(
+    "Account balance:",
+    (await fixture.deployer.getBalance()).toString()
+  );
+
+  
+
+  await fixture.initController();
+  await fixture.indexTokenFactory.createIndexToken(
+    [components.A.addr, components.B.addr],
+    [components.A.unit, components.B.unit],
+    [toE18(25), toE18(75)],
+    fixture.deployer.address,
+    "FirstIndex",
+    "IDX"
+  );
+
+  console.log({
+    controller: fixture.controller.address,
+    multiAssetSwapper: fixture.multiAssetSwapper.address,
+    indexTokenFactory: fixture.indexTokenFactory.address,
+  });
+  console.log(
+    "for copy to verify contract:\n",
+    "./verify.sh ",
+    fixture.controller.address,
+    fixture.multiAssetSwapper.address,
+    fixture.indexTokenFactory.address,
+    fixture.dcaManager.address,
+    fixture.router.address,
+    fixture.addresses.wavax,
+    fixture.deployer.address
+  );
 }
 
 // We recommend this pattern to be able to use async/await everywhere
