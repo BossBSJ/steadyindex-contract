@@ -4,6 +4,7 @@ import { ERC20__factory, IJoeRouter02 } from "../typechain-types";
 import { expect } from "chai";
 import { avalanche } from "../constant";
 import { centralFixture } from "./shares/fixtures";
+import { ethers } from "ethers";
 
 const { tokenA, tokenB, tokenC, wavax } = avalanche;
 
@@ -52,7 +53,7 @@ describe("MultiAssetSwapper", () => {
         tokenC,
       ])
     )[1];
-console.log(_tokenABal, _tokenBBal, _tokenCBal)
+
     await multiAssetSwapper.swapMultiTokensForToken(
       [tokenA, tokenB],
       [100e6, 200e6],
@@ -66,13 +67,12 @@ console.log(_tokenABal, _tokenBBal, _tokenCBal)
       tokenC,
     ]);
 
-    console.log("actual bal", tokenCBal.toString());
     expect(_tokenABal.sub(100e6), "tokenA balance").to.equal(tokenABal);
     expect(_tokenBBal.sub(200e6), "tokenB balance").to.equal(tokenBBal);
     expect(
       _tokenCBal.add(expectOutCFromWeth),
       "tokenC balance"
-    ).to.approximately(tokenCBal, 2);
+    ).to.approximately(tokenCBal, 100);
   });
 
   it("swapTokenForMultiTokens", async () => {

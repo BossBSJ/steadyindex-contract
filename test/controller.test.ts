@@ -1,6 +1,6 @@
 import hre from "hardhat";
 import { MyAddr, toE18, avalanche } from "../constant";
-import { Controller, IJoeRouter02, IUniswapV2Router02, IndexToken } from "../typechain-types";
+import { Controller, IJoeRouter02, IndexToken } from "../typechain-types";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { centralFixture } from "./shares/fixtures";
@@ -35,8 +35,6 @@ describe("Controller", () => {
       ])
     )[0];
     const amountIn = _amountIn.add(_amountIn.div(400));
-
-    // console.log("Expect to use: ", amountIn.toString());
 
     await addrApproveTokenForSpender(
       tokenC,
@@ -89,7 +87,6 @@ describe("Controller", () => {
       tokenC,
       firstIndex.address,
     ]);
-    console.log(_tokenCBal, _firstIdxBal)
 
     const { amountIn } = await issueIndexToken();
 
@@ -135,7 +132,6 @@ describe("Controller", () => {
     ]);
 
     expect(firstIdxBal, "firstIndex balance ").to.equal("0");
-    console.log(tokenCBal);
     expect(tokenCBal, "tokenC balance").to.greaterThan(_tokenCBal);
   });
 

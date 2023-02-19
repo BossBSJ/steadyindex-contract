@@ -23,12 +23,6 @@ async function main() {
     "Deploying contracts with the account:",
     fixture.deployer.address
   );
-  console.log(
-    "Account balance:",
-    (await fixture.deployer.getBalance()).toString()
-  );
-
-  
 
   await fixture.initController();
   await fixture.indexTokenFactory.createIndexToken(

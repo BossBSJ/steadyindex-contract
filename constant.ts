@@ -18,9 +18,11 @@ export const avalancheTestnet = {
 };
 const avalancheMainnet = {
   joeRouter02: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
-  tokenA: "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e", // usdc
-  tokenB: "0x6e84a6216ea6dacc71ee8e6b0a5b7322eebc0fdd", // joe
-  tokenC: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab", // weth
+  tokenA: "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e", // usdc 6
+  tokenB: "0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7", // usdt 6
+  // tokenB: "0x6e84a6216ea6dacc71ee8e6b0a5b7322eebc0fdd", // joe
+  tokenC: "0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664", // usdc.e 6
+  // tokenC: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab", // weth
   wavax: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
   lbRouter: "0xE3Ffc583dC176575eEA7FD9dF2A7c65F7E23f4C3",
 };

@@ -1,5 +1,5 @@
 import hre from "hardhat";
-import { avalanche } from "../../constant";
+import { avalanche, toE18 } from "../../constant";
 import BigNumber from "bignumber.js";
 
 export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
@@ -27,6 +27,25 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
   const dcaManager = await (
     await hre.ethers.getContractFactory("DCAManager")
   ).deploy(deployer.address, controller.address);
+
+  async function getIndexToken(idx: number = 0) {
+    return hre.ethers.getContractAt(
+      "IndexToken",
+      (await indexTokenFactory.getIndexs())[idx]
+    );
+  }
+
+  async function createDefaultIndex() {
+    await indexTokenFactory.createIndexToken(
+      [tokenA, tokenB],
+      [25e6, 75e6],
+      [toE18(25), toE18(75)],
+      deployer.address,
+      "FirstIndex",
+      "IDX"
+    );
+    return await getIndexToken();
+  }
 
   async function initController() {
     await controller.initialize(
@@ -63,7 +82,7 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
         [wavax, tokenA],
         deployer.address,
         Math.floor(Date.now() / 1000) + 60 * 10,
-        { value: hre.ethers.utils.parseEther("1000") }
+        { value: hre.ethers.utils.parseEther("100") }
       );
     }
     if ((await ERC20.attach(tokenB).balanceOf(deployer.address)).isZero()) {
@@ -72,7 +91,7 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
         [wavax, tokenB],
         deployer.address,
         Math.floor(Date.now() / 1000) + 60 * 10,
-        { value: hre.ethers.utils.parseEther("1000") }
+        { value: hre.ethers.utils.parseEther("100") }
       );
     }
     if ((await ERC20.attach(tokenC).balanceOf(deployer.address)).isZero()) {
@@ -81,7 +100,7 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
         [wavax, tokenC],
         deployer.address,
         Math.floor(Date.now() / 1000) + 60 * 10,
-        { value: hre.ethers.utils.parseEther("1000") }
+        { value: hre.ethers.utils.parseEther("100") }
       );
     }
   }
@@ -93,11 +112,13 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
     router,
     ERC20,
     controller,
+    createDefaultIndex,
     indexTokenFactory,
     dcaManager,
     getTokensBalanceOf,
     addrApproveTokenForSpender,
     autoSwapIfNoBalance,
     initController,
+    getIndexToken,
   };
 }

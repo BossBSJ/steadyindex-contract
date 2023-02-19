@@ -49,7 +49,7 @@ contract Controller {
     function initialize(
         address _indexTokenFactory,
         IMultiAssetSwapper _multiAssetSwaper
-    ) external {
+    ) external onlyAdmin {
         indexTokenFactory = _indexTokenFactory;
         multiAssetSwaper = _multiAssetSwaper;
     }
