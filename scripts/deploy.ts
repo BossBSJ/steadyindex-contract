@@ -1,56 +1,61 @@
 import { ethers } from "hardhat";
+import { centralFixture } from "../test/shares/fixtures";
+import { MyAddr, avalancheTestnet, toE, toE18 } from "../constant";
 
-const tokenAddr = {
-  main: {},
-  test: {
-    weth: "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
-    uni: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-  },
-};
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
-  console.log("Deploying contracts with the account:", deployer.address);
-  console.log("Account balance:", (await deployer.getBalance()).toString());
+  const components = {
+    A: { addr: avalancheTestnet.tokenA, unit: 25e6 },
+    B: { addr: avalancheTestnet.tokenB, unit: 75e6 },
+  };
+  (await ethers.getContractAt("IndexTokenFactory", "0xae7b1530cb79748c878f44fe7e8289f09c9edb45")).createIndexToken(
+    [components.A.addr, components.B.addr],
+    [components.A.unit, components.B.unit],
+    [toE18(25), toE18(75)],
+    MyAddr,
+    "FirstIndex",
+    "IDX"
+  );
 
-  const Controller = await ethers.getContractFactory("Controller");
-  const MultiAssetSwapper = await ethers.getContractFactory(
-    "MultiAssetSwapper"
-  );
-  const IndexTokenFactory = await ethers.getContractFactory(
-    "IndexTokenFactory"
-  );
+  // const fixture = await centralFixture(avalancheTestnet);
 
-  const controller = await Controller.deploy();
-  const multiAssetSwapper = await MultiAssetSwapper.deploy(
-    "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-    controller.address
-  );
-  const indexTokenFactory = await IndexTokenFactory.deploy(controller.address);
-
-  await controller.initialize(
-    indexTokenFactory.address,
-    multiAssetSwapper.address
-  );
-  // await indexTokenFactory.createIndexToken(
-  //   [tokenAddr.test.weth, tokenAddr.test.uni],
-  //   [1000, 2000],
-  //   deployer.address,
-  //   "stIndex",
-  //   "STI"
+  // console.log(
+  //   "Deploying contracts with the account:",
+  //   fixture.deployer.address
+  // );
+  // console.log(
+  //   "Account balance:",
+  //   (await fixture.deployer.getBalance()).toString()
   // );
 
-  console.log({
-    controller: controller.address,
-    multiAssetSwapper: multiAssetSwapper.address,
-    indexTokenFactory: indexTokenFactory.address,
-  });
-  console.log(
-    "for copy to verify contract:\n",
-    controller.address,
-    multiAssetSwapper.address,
-    indexTokenFactory.address
-  );
+  
+
+  // await fixture.initController();
+  // await fixture.indexTokenFactory.createIndexToken(
+  //   [components.A.addr, components.B.addr],
+  //   [components.A.unit, components.B.unit],
+  //   [toE18(25), toE18(75)],
+  //   fixture.deployer.address,
+  //   "FirstIndex",
+  //   "IDX"
+  // );
+
+  // console.log({
+  //   controller: fixture.controller.address,
+  //   multiAssetSwapper: fixture.multiAssetSwapper.address,
+  //   indexTokenFactory: fixture.indexTokenFactory.address,
+  // });
+  // console.log(
+  //   "for copy to verify contract:\n",
+  //   "./verify.sh ",
+  //   fixture.controller.address,
+  //   fixture.multiAssetSwapper.address,
+  //   fixture.indexTokenFactory.address,
+  //   fixture.dcaManager.address,
+  //   fixture.router.address,
+  //   fixture.addresses.wavax,
+  //   fixture.deployer.address
+  // );
 }
 
 // We recommend this pattern to be able to use async/await everywhere

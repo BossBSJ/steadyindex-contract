@@ -6,7 +6,9 @@
   "license": "MIT",
   "scripts": {
     "compile": "./clean.sh && npx hardhat compile",
-    "deploy:testnet": "npx hardhat run scripts/deploy.ts --network goerli",
+    "deploy:testnet": "npx hardhat run scripts/deploy.ts --network fuji",
+    "deploy:fuji": "npx hardhat run scripts/deploy.ts --network fuji",
+    "deploy:goerli": "npx hardhat run scripts/deploy.ts --network goerli",
     "debug": "npx hardhat run scripts/debug.ts --network goerli"
   },
   "devDependencies": {

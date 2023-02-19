@@ -1,35 +1,37 @@
 import hre from "hardhat";
-import { MyAddr, toE18, tokenA, tokenB, tokenC, wethAddr } from "./constant";
-import { Controller, IUniswapV2Router02, IndexToken } from "../typechain-types";
+import { MyAddr, toE18, avalanche } from "../constant";
+import { Controller, IJoeRouter02, IUniswapV2Router02, IndexToken } from "../typechain-types";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { centralFixture } from "./shares/fixtures";
+
+const {tokenA, tokenB, tokenC, wavax} = avalanche
 
 describe("Controller", () => {
   let firstIndex: IndexToken;
   let controller: Controller;
   let deployer: SignerWithAddress;
-  let uniswapRouter: IUniswapV2Router02;
+  let router: IJoeRouter02;
 
   const components = {
-    A: { addr: tokenA, unit: 25e10 },
-    B: { addr: tokenB, unit: 75e10 },
+    A: { addr: tokenA, unit: 25e6 },
+    B: { addr: tokenB, unit: 75e6 },
   };
 
   const issueIndexToken = async () => {
     const { addrApproveTokenForSpender } = await centralFixture();
     const [wethAmountIn1, wethAmountIn2] = await Promise.all([
       (
-        await uniswapRouter.getAmountsIn(components.A.unit, [wethAddr, tokenA])
+        await router.getAmountsIn(components.A.unit, [wavax, tokenA])
       )[0],
       (
-        await uniswapRouter.getAmountsIn(components.B.unit, [wethAddr, tokenB])
+        await router.getAmountsIn(components.B.unit, [wavax, tokenB])
       )[0],
     ]);
     const _amountIn = (
-      await uniswapRouter.getAmountsIn(wethAmountIn1.add(wethAmountIn2), [
+      await router.getAmountsIn(wethAmountIn1.add(wethAmountIn2), [
         tokenC,
-        wethAddr,
+        wavax,
       ])
     )[0];
     const amountIn = _amountIn.add(_amountIn.div(400));
@@ -54,8 +56,9 @@ describe("Controller", () => {
 
   before(async () => {
     const fixture = await centralFixture();
+    await fixture.autoSwapIfNoBalance()
     deployer = fixture.deployer;
-    uniswapRouter = fixture.uniswapRouter;
+    router = fixture.router;
     controller = fixture.controller;
     const indexTokenFactory = fixture.indexTokenFactory;
     const multiAssetSwapper = fixture.multiAssetSwapper;
@@ -86,6 +89,7 @@ describe("Controller", () => {
       tokenC,
       firstIndex.address,
     ]);
+    console.log(_tokenCBal, _firstIdxBal)
 
     const { amountIn } = await issueIndexToken();
 

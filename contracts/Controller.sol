@@ -6,7 +6,7 @@ import {IMultiAssetSwapper} from "../interfaces/IMultiAssetSwapper.sol";
 import {IIndexToken} from "../interfaces/IIndexToken.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import {IJoeRouter02} from "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeRouter02.sol";
 
 import "hardhat/console.sol";
 
@@ -162,7 +162,7 @@ contract Controller {
         );
 
         address WRAP_NATIVE_ADDR = multiAssetSwaper.WRAP_NATIVE_ADDR();
-        IUniswapV2Router02 router = IUniswapV2Router02(
+        IJoeRouter02 router = IJoeRouter02(
             multiAssetSwaper.router()
         );
 

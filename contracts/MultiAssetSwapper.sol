@@ -4,7 +4,9 @@ import "hardhat/console.sol";
 
 import {IMultiAssetSwapper} from "../interfaces/IMultiAssetSwapper.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+// import "@uniswap/v2-periphery/contracts/interfaces/IJoeRouter02.sol";
+import {IJoeRouter02} from "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeRouter02.sol";
+
 
 // uniswapRouter 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
 // weth 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6
@@ -18,14 +20,14 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
 
     /* ============ State Variables ============ */
     address public admin;
-    IUniswapV2Router02 public router;
+    IJoeRouter02 public router;
     address public WRAP_NATIVE_ADDR;
 
     /* ============ Functions ============ */
 
-    constructor(address _uniswapRouter, address _wethAddr) {
+    constructor(address _router, address _wethAddr) {
         admin = msg.sender;
-        router = IUniswapV2Router02(_uniswapRouter);
+        router = IJoeRouter02(_router);
         WRAP_NATIVE_ADDR = _wethAddr;
     }
 
@@ -41,20 +43,20 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
             _tokenIns.length == _amountIns.length,
             "Invalid input parameters"
         );
+console.log("start ");
 
-        uint256 totalAmount = 0;
         for (uint256 i = 0; i < _tokenIns.length; i++) {
             IERC20 token = IERC20(_tokenIns[i]);
             uint256 allowance = token.allowance(msg.sender, address(this));
             require(allowance >= _amountIns[i], "Insufficient token allowance");
+console.log("transfering... %s ", i);
 
-            totalAmount += _amountIns[i];
             require(
                 token.transferFrom(msg.sender, address(this), _amountIns[i]),
                 "Failed to transfer tokens, tokenIns"
             );
         }
-
+console.log("approving...");
         for (uint256 i = 0; i < _tokenIns.length; i++) {
             _approveTokenForSpender(
                 _tokenIns[i],
@@ -69,7 +71,7 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
             path[0] = _tokenIns[i];
             path[1] = WRAP_NATIVE_ADDR;
             path[2] = _tokenOut;
-
+console.log("swaping... %s ",i );
             uint256 receivedAmount = router.swapExactTokensForTokens(
                 _amountIns[i],
                 0,
