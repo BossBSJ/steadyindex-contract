@@ -25,16 +25,16 @@ async function main() {
   );
 
   await fixture.initController();
-  await fixture.indexTokenFactory.createIndexToken(
-    [components.A.addr, components.B.addr],
-    [components.A.unit, components.B.unit],
-    [toE18(25), toE18(75)],
-    fixture.deployer.address,
-    "FirstIndex",
-    "IDX"
-  );
+  // await fixture.indexTokenFactory.createIndexToken(
+  //   [components.A.addr, components.B.addr],
+  //   [components.A.unit, components.B.unit],
+  //   [toE18(25), toE18(75)],
+  //   fixture.deployer.address,
+  //   "FirstIndex",
+  //   "IDX"
+  // );
 
-  const firstIndex = await fixture.getIndexToken(0);
+  // const firstIndex = await fixture.getIndexToken(0);
 
   console.log({
     controller: fixture.controller.address,
@@ -51,7 +51,7 @@ async function main() {
     fixture.router.address,
     fixture.addresses.wavax,
     fixture.deployer.address,
-    firstIndex.address
+    // firstIndex.address
   );
 }
 
@@ -74,9 +74,13 @@ main().catch((error) => {
 // npx hardhat run --network fuji scripts/deploy.ts
 // npx hardhat verify --network fuji
 
-// address on fuji
-// {
-//   controller: '0xF913856b0Ab7fF2174bbFd9EC794994662fD3A28',
-//   multiAssetSwapper: '0x4716bD6ED2Eb6E8473F7a655c3108d5670A5f7ED',
-//   indexTokenFactory: '0x185C3Df21000FfB3E3bA337d4F482cCDc6Fc8621'
-// }
+
+// controller 0x4Fe0E150e6A098eE47f874a31d7905D2CA9D3337
+// multiAssetSwap 0xE8e8713DEc79B530F4D034f77A092cD72Ef84B33
+// factory 0x2171cec34E849F4CAEafaCbF97BE428b88a68d17
+// dca 0x2E91A966cAB8de3a33EA858606206Be720F233b5
+
+// router 0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901
+// WAVAX 0xd00ae08403B9bbb9124bB305C09058E32C39A48c
+
+
