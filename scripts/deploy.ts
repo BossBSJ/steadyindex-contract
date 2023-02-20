@@ -36,21 +36,30 @@ async function main() {
 
   // const firstIndex = await fixture.getIndexToken(0);
 
-  console.log({
-    controller: fixture.controller.address,
-    multiAssetSwapper: fixture.multiAssetSwapper.address,
-    indexTokenFactory: fixture.indexTokenFactory.address,
-  });
+  // console.log({
+  //   controller: fixture.controller.address,
+  //   multiAssetSwapper: fixture.multiAssetSwapper.address,
+  //   indexTokenFactory: fixture.indexTokenFactory.address,
+  // });
   console.log(
     "for copy to verify contract:\n",
     "./verify.sh ",
-    fixture.controller.address,
-    fixture.multiAssetSwapper.address,
-    fixture.indexTokenFactory.address,
-    fixture.dcaManager.address,
-    fixture.router.address,
-    fixture.addresses.wavax,
-    fixture.deployer.address,
+      fixture.controller.address,
+      fixture.multiAssetSwapper.address,
+      fixture.indexTokenFactory.address,
+      fixture.dcaManager.address,
+      fixture.router.address,
+      fixture.addresses.wavax,
+      fixture.deployer.address,
+    {
+      controller: fixture.controller.address,
+      multiAssetSwapper: fixture.multiAssetSwapper.address,
+      indexTokenFactory: fixture.indexTokenFactory.address,
+      dcaManager: fixture.dcaManager.address,
+      router: fixture.router.address,
+      addresses: fixture.addresses.wavax,
+      deployer: fixture.deployer.address,
+  }
     // firstIndex.address
   );
 }
@@ -82,5 +91,6 @@ main().catch((error) => {
 
 // router 0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901
 // WAVAX 0xd00ae08403B9bbb9124bB305C09058E32C39A48c
+
 
 
