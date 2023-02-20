@@ -309,6 +309,7 @@ contract IndexToken is ERC20 {
         for (uint256 i = 0; i < positions.length; i++) {
             componentAddrs[i] = positions[i].component;
             unitNeeds[i] = _amount.preciseMul(positions[i].unit);
+console.log("org unit [%s] : %s  => %s",i , positions[i].unit, unitNeeds[i]);
         }
 
         return (componentAddrs, unitNeeds);

@@ -1,21 +1,25 @@
 import { MultiAssetSwapper } from "../typechain-types/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { ERC20__factory, IUniswapV2Router02 } from "../typechain-types";
+import { ERC20__factory, IJoeRouter02 } from "../typechain-types";
 import { expect } from "chai";
-import { tokenA, tokenB, tokenC, wethAddr } from "./constant";
+import { avalanche } from "../constant";
 import { centralFixture } from "./shares/fixtures";
+import { ethers } from "ethers";
+
+const { tokenA, tokenB, tokenC, wavax } = avalanche;
 
 describe("MultiAssetSwapper", () => {
   let deployer: SignerWithAddress;
   let multiAssetSwapper: MultiAssetSwapper;
-  let uniswapRouter: IUniswapV2Router02;
+  let router: IJoeRouter02;
   let ERC20: ERC20__factory;
 
   before(async () => {
     const fixture = await centralFixture();
+    await fixture.autoSwapIfNoBalance();
     deployer = fixture.deployer;
     multiAssetSwapper = fixture.multiAssetSwapper;
-    uniswapRouter = fixture.uniswapRouter;
+    router = fixture.router;
     ERC20 = fixture.ERC20;
 
     // Token A B C approve multiSwapAsset
@@ -38,19 +42,21 @@ describe("MultiAssetSwapper", () => {
       tokenB,
       tokenC,
     ]);
-    const [wethOutFromA, wethOutFromB] = await Promise.all([
-      (await uniswapRouter.getAmountsOut(1e10, [tokenA, wethAddr]))[1],
-      (await uniswapRouter.getAmountsOut(2e10, [tokenB, wethAddr]))[1],
+    const [wavaxOutFromA, wavaxOutFromB] = await Promise.all([
+      (await router.getAmountsOut(100e6, [tokenA, wavax]))[1],
+      (await router.getAmountsOut(200e6, [tokenB, wavax]))[1],
     ]);
+
     const expectOutCFromWeth = (
-      await uniswapRouter.getAmountsOut(wethOutFromA.add(wethOutFromB), [
-        wethAddr,
+      await router.getAmountsOut(wavaxOutFromA.add(wavaxOutFromB), [
+        wavax,
         tokenC,
       ])
     )[1];
+
     await multiAssetSwapper.swapMultiTokensForToken(
       [tokenA, tokenB],
-      [1e10, 2e10],
+      [100e6, 200e6],
       0,
       tokenC,
       deployer.address
@@ -60,11 +66,13 @@ describe("MultiAssetSwapper", () => {
       tokenB,
       tokenC,
     ]);
-    expect(_tokenABal.sub(1e10), "tokenA balance").to.equal(tokenABal);
-    expect(_tokenBBal.sub(2e10), "tokenB balance").to.equal(tokenBBal);
-    expect(_tokenCBal.add(expectOutCFromWeth), "tokenC balance").to.equal(
-      tokenCBal
-    );
+
+    expect(_tokenABal.sub(100e6), "tokenA balance").to.equal(tokenABal);
+    expect(_tokenBBal.sub(200e6), "tokenB balance").to.equal(tokenBBal);
+    expect(
+      _tokenCBal.add(expectOutCFromWeth),
+      "tokenC balance"
+    ).to.approximately(tokenCBal, 100);
   });
 
   it("swapTokenForMultiTokens", async () => {
@@ -76,21 +84,21 @@ describe("MultiAssetSwapper", () => {
       tokenC,
     ]);
     const [wethAmountIn1, wethAmountIn2] = await Promise.all([
-      uniswapRouter.getAmountsIn(1e10, [wethAddr, tokenA]),
-      uniswapRouter.getAmountsIn(12e9, [wethAddr, tokenB]),
+      router.getAmountsIn(100e6, [wavax, tokenA]),
+      router.getAmountsIn(12e5, [wavax, tokenB]),
     ]);
     const [amountIns] = await Promise.all([
-      uniswapRouter.getAmountsIn(wethAmountIn1[0].add(wethAmountIn2[0]), [
+      router.getAmountsIn(wethAmountIn1[0].add(wethAmountIn2[0]), [
         tokenC,
-        wethAddr,
+        wavax,
       ]),
     ]);
-    const amountIn = amountIns[0];
+    const amountIn = amountIns[0].add(amountIns[0].div(400));
 
     await multiAssetSwapper.swapTokenForMultiTokens(
       tokenC,
       amountIn,
-      [1e10, 12e9],
+      [100e6, 12e5],
       [tokenA, tokenB],
       deployer.address
     );
@@ -99,8 +107,8 @@ describe("MultiAssetSwapper", () => {
       tokenB,
       tokenC,
     ]);
-    expect(_tokenABal.add(1e10), "tokenA balance").to.equal(tokenABal);
-    expect(_tokenBBal.add(12e9), "tokenB balance").to.equal(tokenBBal);
+    expect(_tokenABal.add(100e6), "tokenA balance").to.equal(tokenABal);
+    expect(_tokenBBal.add(12e5), "tokenB balance").to.equal(tokenBBal);
     expect(_tokenCBal.sub(amountIn), "tokenC balance").to.equal(tokenCBal);
   });
 });

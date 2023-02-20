@@ -4,12 +4,12 @@ pragma solidity ^0.8.0;
 pragma experimental "ABIEncoderV2";
 
 import {IIndexToken} from "./IIndexToken.sol";
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
+import {IJoeRouter02} from "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeRouter02.sol";
 
 interface IMultiAssetSwapper {
     function admin() external view returns (address);
 
-    function router() external view returns (IUniswapV2Router02);
+    function router() external view returns (IJoeRouter02);
 
     function WRAP_NATIVE_ADDR() external view returns (address);
 

@@ -1,12 +1,13 @@
 pragma solidity ^0.8.0;
 pragma experimental "ABIEncoderV2";
+import {IController} from "../interfaces/IController.sol";
 
 interface IDCAManager {
     struct Investment {
         address trusted;
         address tokenIn;
         address indexTokenAddr;
-        uint256 startBlock;
+        uint256 lastBuy;
         uint256 cycle;
     }
 
@@ -15,13 +16,15 @@ interface IDCAManager {
         view
         returns (uint256);
 
-    function subscript(
+    function subscription(
         address _trustedAddr,
         address _indexTokenAddr,
         uint256 _indexTokenAmount,
         address _tokenIn,
         uint256 _cycle
     ) external;
+
+    function unsubscription(uint256 _investmentId) external;
 
     function buyFor(
         address _investor,

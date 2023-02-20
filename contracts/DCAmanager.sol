@@ -7,6 +7,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IDCAManager} from "../interfaces/IDCAManager.sol";
 import {IController} from "../interfaces/IController.sol";
 
+import "hardhat/console.sol";
+
 contract DCAManager is IDCAManager {
     /* ============ Modifier ============ */
     modifier onlyAdmin() {
@@ -28,6 +30,14 @@ contract DCAManager is IDCAManager {
     }
 
     /* ============ External Functions ============ */
+    function InvestmentsForAccount(address _investor)
+        external
+        view
+        returns (IDCAManager.Investment[] memory)
+    {
+        return investments[_investor];
+    }
+
     function givedAllowance(address _account, address _tokenAddr)
         external
         view
@@ -36,7 +46,7 @@ contract DCAManager is IDCAManager {
         return IERC20(_tokenAddr).allowance(_account, address(this));
     }
 
-    function subscript(
+    function subscription(
         address _trustedAddr,
         address _indexTokenAddr,
         uint256 _indexTokenAmount,
@@ -50,7 +60,7 @@ contract DCAManager is IDCAManager {
             _trustedAddr,
             _tokenIn,
             _indexTokenAddr,
-            block.number,
+            0,
             _cycle
         );
 
@@ -58,7 +68,16 @@ contract DCAManager is IDCAManager {
         buyFor(_investor, investmentId, _indexTokenAmount);
     }
 
-    function unsubscription() public {}
+    function unsubscription(uint256 _investmentId) external {
+        IDCAManager.Investment[] storage investment = investments[msg.sender];
+        require(investment.length > _investmentId, "Out of range Investments");
+        for (uint256 i = _investmentId; i < investment.length-1; i++) {
+            investment[i] = investment[i + 1];
+        }
+        investment.pop();
+
+        investments[msg.sender] = investment;
+    }
 
     function buyFor(
         address _investor,
@@ -70,11 +89,24 @@ contract DCAManager is IDCAManager {
         ];
         _validateOnlyTruste(investment.trusted);
 
+        require(
+            investment.lastBuy + investment.cycle <= block.timestamp,
+            "Cycle missmatch"
+        );
+        if (investment.lastBuy == 0) {
+            investment.lastBuy = block.timestamp;
+        } else {
+            investment.lastBuy = investment.lastBuy + investment.cycle;
+        }
+        investments[_investor][_investmentId] = investment;
+
         (uint256 tokenInAmount, , ) = controller.getAmountInForIndexToken(
             investment.indexTokenAddr,
             _indexTokenAmount,
             investment.tokenIn
         );
+
+console.log("DCA tokenInAmount: %s", tokenInAmount);
 
         require(
             IERC20(investment.tokenIn).transferFrom(
@@ -97,10 +129,6 @@ contract DCAManager is IDCAManager {
             investment.tokenIn,
             _investor
         );
-    }
-
-    function sellFor() public {
-        // ...
     }
 
     /* ============ Internal Functions ============ */

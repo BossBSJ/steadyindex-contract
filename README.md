@@ -17,6 +17,10 @@ to compile contract run code below
 yarn
 yarn compile
 ```
+to deploy contract to fuji network
+```shell
+yarn deploy:fuji
+```
 then lets verify contract. copy output log from above and run
 ```
 ./verify.sh <place 3 address here>
