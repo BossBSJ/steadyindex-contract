@@ -5,10 +5,11 @@ import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { centralFixture } from "./shares/fixtures";
 
-const {tokenA, tokenB, tokenC, wavax} = avalanche
+const { tokenA, tokenB, tokenC, wavax } = avalanche;
 
 describe("Controller", () => {
   let firstIndex: IndexToken;
+  let WAVAXIndex: IndexToken;
   let controller: Controller;
   let deployer: SignerWithAddress;
   let router: IJoeRouter02;
@@ -18,15 +19,11 @@ describe("Controller", () => {
     B: { addr: tokenB, unit: 75e6 },
   };
 
-  const issueIndexToken = async () => {
+  const issueFirstIndexToken = async () => {
     const { addrApproveTokenForSpender } = await centralFixture();
     const [wethAmountIn1, wethAmountIn2] = await Promise.all([
-      (
-        await router.getAmountsIn(components.A.unit, [wavax, tokenA])
-      )[0],
-      (
-        await router.getAmountsIn(components.B.unit, [wavax, tokenB])
-      )[0],
+      (await router.getAmountsIn(components.A.unit, [wavax, tokenA]))[0],
+      (await router.getAmountsIn(components.B.unit, [wavax, tokenB]))[0],
     ]);
     const _amountIn = (
       await router.getAmountsIn(wethAmountIn1.add(wethAmountIn2), [
@@ -51,10 +48,53 @@ describe("Controller", () => {
 
     return { amountIn };
   };
+  const issueWAVAXIndexToken = async () => {
+    const { addrApproveTokenForSpender } = await centralFixture();
+    const components = await WAVAXIndex.getPositions();
+    const wavaxAmounts = await Promise.all(
+      components
+        .filter((comp) => comp.component.toLowerCase() != wavax.toLowerCase())
+        .map(
+          async (comp) =>
+            (
+              await router.getAmountsIn(comp.unit, [wavax, comp.component])
+            )[0]
+        )
+    );
+
+    const wavaxSumAmount = [...wavaxAmounts, ...components.filter(comp => comp.component == wavax).map(comp => comp.unit)].reduce((accum, current) => accum.add(current))
+
+    // const [wethAmountIn1, wethAmountIn2] = await Promise.all([
+    //   (await router.getAmountsIn(components[0].unit, [wavax, tokenA]))[0],
+    //   (await router.getAmountsIn(components[1].unit, [wavax, tokenB]))[0],
+    // ]);
+    const _amountIn = (
+      await router.getAmountsIn(
+        wavaxSumAmount,
+        [tokenC, wavax]
+      )
+    )[0];
+    const amountIn = _amountIn.add(_amountIn.div(400));
+
+    await addrApproveTokenForSpender(
+      tokenC,
+      controller.address,
+      amountIn.toString()
+    );
+
+    await controller.issueIndexToken(
+      WAVAXIndex.address,
+      toE18(1),
+      tokenC,
+      deployer.address
+    );
+
+    return { amountIn };
+  };
 
   before(async () => {
     const fixture = await centralFixture();
-    await fixture.autoSwapIfNoBalance()
+    await fixture.autoSwapIfNoBalance();
     deployer = fixture.deployer;
     router = fixture.router;
     controller = fixture.controller;
@@ -66,21 +106,11 @@ describe("Controller", () => {
       multiAssetSwapper.address
     );
 
-    await indexTokenFactory.createIndexToken(
-      [components.A.addr, components.B.addr],
-      [components.A.unit, components.B.unit],
-      [toE18(25), toE18(75)],
-      MyAddr,
-      "FirstIndex",
-      "IDX"
-    );
-    firstIndex = await hre.ethers.getContractAt(
-      "IndexToken",
-      await indexTokenFactory.indexTokens(0)
-    );
+    firstIndex = await fixture.createDefaultIndex();
+    WAVAXIndex = await fixture.createWAVAXIndex();
   });
 
-  it("issueIndexToken", async () => {
+  it("issueFirstIndexToken", async () => {
     const { getTokensBalanceOf } = await centralFixture();
 
     const [_tokenCBal, _firstIdxBal] = await getTokensBalanceOf([
@@ -88,7 +118,7 @@ describe("Controller", () => {
       firstIndex.address,
     ]);
 
-    const { amountIn } = await issueIndexToken();
+    const { amountIn } = await issueFirstIndexToken();
 
     const [tokenCBal, firstIdxBal] = await getTokensBalanceOf([
       tokenC,
@@ -101,18 +131,39 @@ describe("Controller", () => {
     );
   });
 
+  it("issueWAVAXIndex", async () => {
+    const { getTokensBalanceOf } = await centralFixture();
+
+    const [_tokenCBal, _firstIdxBal] = await getTokensBalanceOf([
+      tokenC,
+      WAVAXIndex.address,
+    ]);
+
+    const { amountIn } = await issueWAVAXIndexToken();
+
+    const [tokenCBal, firstIdxBal] = await getTokensBalanceOf([
+      tokenC,
+      WAVAXIndex.address,
+    ]);
+
+    expect(tokenCBal, "tokenC balance").to.equal(_tokenCBal.sub(amountIn));
+    expect(firstIdxBal, "WAVAXIndex balance").to.equal(
+      _firstIdxBal.add(toE18(1))
+    );
+  });
+
   it("redeemIndexToken all balance", async () => {
     const { getTokensBalanceOf, addrApproveTokenForSpender } =
       await centralFixture();
 
-    await issueIndexToken();
-    
+    await issueFirstIndexToken();
+
     const [_tokenCBal, _firstIdxBal] = await getTokensBalanceOf([
       tokenC,
       firstIndex.address,
     ]);
 
-    await addrApproveTokenForSpender(  
+    await addrApproveTokenForSpender(
       firstIndex.address,
       controller.address,
       _firstIdxBal.toString()
@@ -139,7 +190,7 @@ describe("Controller", () => {
     const { getTokensBalanceOf, addrApproveTokenForSpender } =
       await centralFixture();
 
-    await issueIndexToken();
+    await issueFirstIndexToken();
     const [_tokenCBal, _firstIdxBal] = await getTokensBalanceOf([
       tokenC,
       firstIndex.address,

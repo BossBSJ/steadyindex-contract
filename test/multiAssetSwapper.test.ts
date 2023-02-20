@@ -75,7 +75,7 @@ describe("MultiAssetSwapper", () => {
     ).to.approximately(tokenCBal, 100);
   });
 
-  it("swapTokenForMultiTokens", async () => {
+  it("swapTokenForMultiTokens Token -> Tokens", async () => {
     const { getTokensBalanceOf } = await centralFixture();
 
     const [_tokenABal, _tokenBBal, _tokenCBal] = await getTokensBalanceOf([
@@ -83,12 +83,12 @@ describe("MultiAssetSwapper", () => {
       tokenB,
       tokenC,
     ]);
-    const [wethAmountIn1, wethAmountIn2] = await Promise.all([
+    const [wavaxAmountIn1, wavaxAmountIn2] = await Promise.all([
       router.getAmountsIn(100e6, [wavax, tokenA]),
       router.getAmountsIn(12e5, [wavax, tokenB]),
     ]);
     const [amountIns] = await Promise.all([
-      router.getAmountsIn(wethAmountIn1[0].add(wethAmountIn2[0]), [
+      router.getAmountsIn(wavaxAmountIn1[0].add(wavaxAmountIn2[0]), [
         tokenC,
         wavax,
       ]),
@@ -100,6 +100,45 @@ describe("MultiAssetSwapper", () => {
       amountIn,
       [100e6, 12e5],
       [tokenA, tokenB],
+      deployer.address
+    );
+    const [tokenABal, tokenBBal, tokenCBal] = await getTokensBalanceOf([
+      tokenA,
+      tokenB,
+      tokenC,
+    ]);
+    expect(_tokenABal.add(100e6), "tokenA balance").to.equal(tokenABal);
+    expect(_tokenBBal.add(12e5), "tokenB balance").to.equal(tokenBBal);
+    expect(_tokenCBal.sub(amountIn), "tokenC balance").to.equal(tokenCBal);
+  });
+
+  it("swapTokenForMultiTokens Token -> Tokens,WAVAX", async () => {
+    const { getTokensBalanceOf } = await centralFixture();
+    const expectAmount = {
+      tokenA: 100e6,
+      tokenB: 12e5,
+      wavax: 15e6,
+    };
+
+    const [_tokenABal, _tokenBBal, _tokenCBal, _wavaxBal] =
+      await getTokensBalanceOf([tokenA, tokenB, tokenC, wavax]);
+    const [wavaxAmountIn1, wavaxAmountIn2] = await Promise.all([
+      router.getAmountsIn(expectAmount.tokenA, [wavax, tokenA]),
+      router.getAmountsIn(expectAmount.tokenB, [wavax, tokenB]),
+    ]);
+    const [amountIns] = await Promise.all([
+      router.getAmountsIn(
+        wavaxAmountIn1[0].add(wavaxAmountIn2[0]).add(expectAmount.wavax),
+        [tokenC, wavax]
+      ),
+    ]);
+    const amountIn = amountIns[0].add(amountIns[0].div(400));
+
+    await multiAssetSwapper.swapTokenForMultiTokens(
+      tokenC,
+      amountIn,
+      [expectAmount.tokenA, expectAmount.tokenB, expectAmount.wavax],
+      [tokenA, tokenB, wavax],
       deployer.address
     );
     const [tokenABal, tokenBBal, tokenCBal] = await getTokensBalanceOf([

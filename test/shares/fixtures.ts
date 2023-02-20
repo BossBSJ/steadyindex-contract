@@ -36,6 +36,7 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
   }
 
   async function createDefaultIndex() {
+    const id = (await indexTokenFactory.getIndexs()).length
     await indexTokenFactory.createIndexToken(
       [tokenA, tokenB],
       [25e6, 75e6],
@@ -44,7 +45,20 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
       "FirstIndex",
       "IDX"
     );
-    return await getIndexToken();
+    return await getIndexToken(id);
+  }
+
+  async function createWAVAXIndex() {
+    const id = (await indexTokenFactory.getIndexs()).length
+    await indexTokenFactory.createIndexToken(
+      [tokenA, tokenB, wavax],
+      [25e6, 25e6, 50e6],
+      [toE18(25), toE18(25), toE18(50)],
+      deployer.address,
+      "IndexWAVAX",
+      "IDXwavax"
+    );
+    return await getIndexToken(id);
   }
 
   async function initController() {
@@ -113,6 +127,7 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
     ERC20,
     controller,
     createDefaultIndex,
+    createWAVAXIndex,
     indexTokenFactory,
     dcaManager,
     getTokensBalanceOf,

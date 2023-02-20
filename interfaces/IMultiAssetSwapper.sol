@@ -11,7 +11,7 @@ interface IMultiAssetSwapper {
 
     function router() external view returns (IJoeRouter02);
 
-    function WRAP_NATIVE_ADDR() external view returns (address);
+    function WAVAX_ADDRESS() external view returns (address);
 
     // function controller() external view returns (address);
 

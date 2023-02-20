@@ -6,7 +6,6 @@ import {IMultiAssetSwapper} from "../interfaces/IMultiAssetSwapper.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IJoeRouter02} from "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeRouter02.sol";
 
-
 contract MultiAssetSwapper is IMultiAssetSwapper {
     /* ============ Modifier ============ */
     modifier onlyAdmin() {
@@ -17,14 +16,14 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
     /* ============ State Variables ============ */
     address public admin;
     IJoeRouter02 public router;
-    address public WRAP_NATIVE_ADDR;
+    address public WAVAX_ADDRESS;
 
     /* ============ Functions ============ */
 
     constructor(address _router, address _wethAddr) {
         admin = msg.sender;
         router = IJoeRouter02(_router);
-        WRAP_NATIVE_ADDR = _wethAddr;
+        WAVAX_ADDRESS = _wethAddr;
     }
 
     /* ============ External Functions ============ */
@@ -62,7 +61,7 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
         uint256 amountOut = 0;
         for (uint256 i = 0; i < _tokenIns.length; i++) {
             path[0] = _tokenIns[i];
-            path[1] = WRAP_NATIVE_ADDR;
+            path[1] = WAVAX_ADDRESS;
             path[2] = _tokenOut;
 
             uint256 receivedAmount = router.swapExactTokensForTokens(
@@ -96,6 +95,8 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
             "Invalid input parameters"
         );
 
+        require(_tokenIn != WAVAX_ADDRESS, "Not allow to use WAVAX as tokenIn");
+
         //  Check tokenIn allowance
         IERC20 tokenIn = IERC20(_tokenIn);
         // uint256 allowance = tokenIn.allowance(msg.sender, address(this));
@@ -119,34 +120,44 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
         address[] memory path = new address[](3);
         uint256 totalAmountInUsed = 0;
         path[0] = _tokenIn;
-        path[1] = WRAP_NATIVE_ADDR;
+        path[1] = WAVAX_ADDRESS;
         console.log("");
         for (uint256 i = 0; i < _tokenOuts.length; i++) {
-            console.log(
-                "Swaping %s, balance: %s",
-                i,
-                tokenIn.balanceOf(address(this))
-            );
             path[2] = _tokenOuts[i];
 
-            console.log(
-                "Calculate will use: %s",
-                router.getAmountsIn(_amountOuts[i], path)[0]
-            );
-            console.log(
-                "Calculate ETH use: %s",
-                router.getAmountsIn(_amountOuts[i], path)[1]
-            );
-
-            uint256 amountInUsed = router.swapTokensForExactTokens(
-                _amountOuts[i],
-                _amountIn,
-                path,
-                _receiver,
-                block.timestamp + 60
-            )[0];
-            console.log("swaped %s with use %s", i, amountInUsed);
-            totalAmountInUsed += amountInUsed;
+            if (_tokenOuts[i] == WAVAX_ADDRESS) {
+                address[] memory tmpPath = new address[](2);
+                tmpPath[0] = path[0];
+                tmpPath[1] = path[1];
+                console.log("swaping... wavax");
+                uint256 amountInUsed = router.swapTokensForExactTokens(
+                    _amountOuts[i],
+                    _amountIn,
+                    tmpPath,
+                    _receiver,
+                    block.timestamp + 60
+                )[0];
+                console.log("swaped %s with use %s", i, amountInUsed);
+                totalAmountInUsed += amountInUsed;
+            } else {
+                console.log(
+                    "Calculate will use: %s",
+                    router.getAmountsIn(_amountOuts[i], path)[0]
+                );
+                console.log(
+                    "Calculate ETH use: %s",
+                    router.getAmountsIn(_amountOuts[i], path)[1]
+                );
+                uint256 amountInUsed = router.swapTokensForExactTokens(
+                    _amountOuts[i],
+                    _amountIn,
+                    path,
+                    _receiver,
+                    block.timestamp + 60
+                )[0];
+                console.log("swaped %s with use %s", i, amountInUsed);
+                totalAmountInUsed += amountInUsed;
+            }
             console.log("");
         }
         console.log("balance: %s", _amountIn - totalAmountInUsed);

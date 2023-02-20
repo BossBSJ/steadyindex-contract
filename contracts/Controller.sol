@@ -161,28 +161,30 @@ contract Controller {
             _indexTokenAmount
         );
 
-        address WRAP_NATIVE_ADDR = multiAssetSwaper.WRAP_NATIVE_ADDR();
-        IJoeRouter02 router = IJoeRouter02(
-            multiAssetSwaper.router()
-        );
+        address WAVAX_ADDRESS = multiAssetSwaper.WAVAX_ADDRESS();
+        IJoeRouter02 router = IJoeRouter02(multiAssetSwaper.router());
 
         address[] memory path = new address[](2);
         uint256 amountWrap = 0;
 
         for (uint256 i = 0; i < tokenOuts.length; i++) {
-            path[0] = WRAP_NATIVE_ADDR;
-            path[1] = tokenOuts[i];
+            if (tokenOuts[i] == WAVAX_ADDRESS) {
+                amountWrap += amountOuts[i];
+            } else {
+                path[0] = WAVAX_ADDRESS;
+                path[1] = tokenOuts[i];
 
-            uint256[] memory amountIns = router.getAmountsIn(
-                amountOuts[i],
-                path
-            );
+                uint256[] memory amountIns = router.getAmountsIn(
+                    amountOuts[i],
+                    path
+                );
 
-            uint256 amountIn = amountIns[0];
-            amountWrap += amountIn;
+                uint256 amountIn = amountIns[0];
+                amountWrap += amountIn;
+            }
         }
         path[0] = _tokenIn;
-        path[1] = WRAP_NATIVE_ADDR;
+        path[1] = WAVAX_ADDRESS;
         uint256 _tokenInAmount = router.getAmountsIn(amountWrap, path)[0];
         tokenInAmount = _tokenInAmount.add(_tokenInAmount.div(400));
     }
