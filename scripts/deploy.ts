@@ -23,7 +23,7 @@ async function main() {
 
   const controller = await Controller.deploy();
   const multiAssetSwapper = await MultiAssetSwapper.deploy(
-    "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    "0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901",
     controller.address
   );
   const indexTokenFactory = await IndexTokenFactory.deploy(controller.address);
@@ -74,7 +74,7 @@ main().catch((error) => {
 
 // address on fuji
 // {
-//   controller: '0xF1401846ffb3758B79D4f4a40aF76a9C53CD10b7',
-//   multiAssetSwapper: '0x4470Cf8282FD95F3f3945DF0Eb45D426aD117f0a',
-//   indexTokenFactory: '0x29Cf4B7f226e6933adf7659ACF6C5be9322A591F'
+//   controller: '0xF913856b0Ab7fF2174bbFd9EC794994662fD3A28',
+//   multiAssetSwapper: '0x4716bD6ED2Eb6E8473F7a655c3108d5670A5f7ED',
+//   indexTokenFactory: '0x185C3Df21000FfB3E3bA337d4F482cCDc6Fc8621'
 // }
