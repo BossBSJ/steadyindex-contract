@@ -1,12 +1,12 @@
 import { ethers } from "hardhat";
 import { centralFixture } from "../test/shares/fixtures";
-import { MyAddr, avalancheTestnet, toE, toE18 } from "../constant";
+import { MyAddr, avalancheTestnetRealToken, toE, toE18 } from "../constant";
 
 
 async function main() {
   const components = {
-    A: { addr: avalancheTestnet.tokenA, unit: 25e6 },
-    B: { addr: avalancheTestnet.tokenB, unit: 75e6 },
+    A: { addr: avalancheTestnetRealToken.tokenA, unit: 25e6 },
+    B: { addr: avalancheTestnetRealToken.tokenB, unit: 75e6 },
   };
   // (await ethers.getContractAt("IndexTokenFactory", "0xae7b1530cb79748c878f44fe7e8289f09c9edb45")).createIndexToken(
   //   [components.A.addr, components.B.addr],
@@ -17,7 +17,7 @@ async function main() {
   //   "IDX"
   // );
 
-  const fixture = await centralFixture(avalancheTestnet);
+  const fixture = await centralFixture(avalancheTestnetRealToken);
 
   console.log(
     "Deploying contracts with the account:",
