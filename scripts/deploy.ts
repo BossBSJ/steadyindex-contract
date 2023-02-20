@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import hre from "hardhat";
 import { centralFixture } from "../test/shares/fixtures";
 import { MyAddr, avalancheTestnetRealToken, toE, toE18 } from "../constant";
 
@@ -36,32 +36,31 @@ async function main() {
 
   // const firstIndex = await fixture.getIndexToken(0);
 
-  // console.log({
-  //   controller: fixture.controller.address,
-  //   multiAssetSwapper: fixture.multiAssetSwapper.address,
-  //   indexTokenFactory: fixture.indexTokenFactory.address,
-  // });
+  console.log({
+    controller: fixture.controller.address,
+    multiAssetSwapper: fixture.multiAssetSwapper.address,
+    indexTokenFactory: fixture.indexTokenFactory.address,
+    dcaManager: fixture.dcaManager.address
+  });
   console.log(
-    "for copy to verify contract:\n",
+    "for copy to verify contract (if the auto verify was failed):\n",
     "./verify.sh ",
-      fixture.controller.address,
-      fixture.multiAssetSwapper.address,
-      fixture.indexTokenFactory.address,
-      fixture.dcaManager.address,
-      fixture.router.address,
-      fixture.addresses.wavax,
-      fixture.deployer.address,
-    {
-      controller: fixture.controller.address,
-      multiAssetSwapper: fixture.multiAssetSwapper.address,
-      indexTokenFactory: fixture.indexTokenFactory.address,
-      dcaManager: fixture.dcaManager.address,
-      router: fixture.router.address,
-      addresses: fixture.addresses.wavax,
-      deployer: fixture.deployer.address,
-  }
-    // firstIndex.address
+    fixture.controller.address,
+    fixture.multiAssetSwapper.address,
+    fixture.indexTokenFactory.address,
+    fixture.dcaManager.address,
+    fixture.router.address,
+    fixture.addresses.wavax,
+    fixture.deployer.address,
+    // firstIndex.address,
+    '\n'
   );
+
+  // await hre.run("verify:verify", {
+  //   address: "address-of-your-smart-contract",
+  //   constructorArguments: ["parameter1","parameter2"],
+  //   // for example, if your constructor argument took an address, do something like constructorArguments: ["0xABCDEF..."],
+  //   });
 }
 
 // We recommend this pattern to be able to use async/await everywhere

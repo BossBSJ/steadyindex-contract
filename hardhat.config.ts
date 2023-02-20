@@ -63,3 +63,17 @@ const config: HardhatUserConfig = {
 };
 
 export default config;
+
+// module.exports = {
+//   networks: {
+//     fuji: {
+//       chainId: 43113,
+//       gasPrice: 225000000000,
+//       url: "https://api.avax-test.network/ext/bc/C/rpc",
+//       accounts: [ACCOUNT_PRIVATE_KEY],
+//     }
+//   },
+//   etherscan: {
+//     apiKey: SNOWTRACE_API
+//   }
+// };

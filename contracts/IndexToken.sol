@@ -257,18 +257,16 @@ contract IndexToken is ERC20 {
         return components.contains(_component);
     }
 
-    function getPostionUnit(address _component) public view returns (uint256) {
+    function getPositionUnit(address _component) public view returns (uint256) {
         return _positionUnit(_component);
     }
 
-    function getAllPositionUnit() external view returns (uint256) {
-        return _getAllUnit();
-    }
-
-    function getPositionRatio(address _component) public view returns (int256) {
-        int256 allUnit = int256(_getAllUnit());
-        return
-            int256(_positionUnit(_component)).conservativePreciseDiv(allUnit);
+    function getPositionStrategicUnit(address _component)
+        public
+        view
+        returns (uint256)
+    {
+        return _positionStrategicUnit(_component);
     }
 
     function getPositions()
@@ -287,8 +285,8 @@ contract IndexToken is ERC20 {
             if (_positionUnit(component) > 0) {
                 positions[positionCount] = IIndexToken.Position({
                     component: component,
-                    unit: getPostionUnit(component),
-                    ratio: getPositionRatio(component)
+                    unit: getPositionUnit(component),
+                    strategicUnit: getPositionStrategicUnit(component)
                 });
                 positionCount++;
             }
@@ -309,7 +307,12 @@ contract IndexToken is ERC20 {
         for (uint256 i = 0; i < positions.length; i++) {
             componentAddrs[i] = positions[i].component;
             unitNeeds[i] = _amount.preciseMul(positions[i].unit);
-console.log("org unit [%s] : %s  => %s",i , positions[i].unit, unitNeeds[i]);
+            console.log(
+                "org unit [%s] : %s  => %s",
+                i,
+                positions[i].unit,
+                unitNeeds[i]
+            );
         }
 
         return (componentAddrs, unitNeeds);
@@ -320,12 +323,12 @@ console.log("org unit [%s] : %s  => %s",i , positions[i].unit, unitNeeds[i]);
         return componentPositions[_component].unit;
     }
 
-    function _getAllUnit() internal view returns (uint256) {
-        uint256 totalUnit = 0;
-        for (uint256 i = 0; i < components.length; i++) {
-            totalUnit += componentPositions[components[i]].unit;
-        }
-        return totalUnit;
+    function _positionStrategicUnit(address _component)
+        internal
+        view
+        returns (uint256)
+    {
+        return componentPositions[_component].strategicUnit;
     }
 
     function _getPositionCount() internal view returns (uint256) {
