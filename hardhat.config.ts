@@ -44,7 +44,7 @@ const config: HardhatUserConfig = {
       accounts: [ACCOUNT_PRIVATE_KEY],
     },
     hardhat: {
-      forking: forking.fuji,
+      forking: forking.avalanche,
       accounts: [
         { privateKey: ACCOUNT_PRIVATE_KEY, balance: ethers.utils.parseEther('1000000000000').toString() },
       ],

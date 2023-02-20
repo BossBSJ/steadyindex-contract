@@ -3,22 +3,22 @@ import { ethers } from "hardhat";
 import { centralFixture } from "./shares/fixtures";
 import { avalancheTestnetRealToken } from "../constant";
 
-describe.only("controller case - specific", () => {
-  it("issue", async () => {
-    const controller = await ethers.getContractAt(
-      "Controller",
-      "0x1d5518120bef0b4dfa934bc53e68f09062f40ecd"
-    );
-    await controller.issueIndexToken(
-      "0x2526a2077F797484408F8Bdf29c108150926DD12",
-      "10000000000000000",
-      "0xB6076C93701D6a07266c31066B298AeC6dd65c2d",
-      "0x4A4803Ce8E17aC61F82312Ed4e3a43291c10f76d"
-    );
-    // expect(false, "xxx");
-  });
+describe("controller case - specific", () => {
+  // it("issue", async () => {
+  //   const controller = await ethers.getContractAt(
+  //     "Controller",
+  //     "0x1d5518120bef0b4dfa934bc53e68f09062f40ecd"
+  //   );
+  //   await controller.issueIndexToken(
+  //     "0x2526a2077F797484408F8Bdf29c108150926DD12",
+  //     "10000000000000000",
+  //     "0xB6076C93701D6a07266c31066B298AeC6dd65c2d",
+  //     "0x4A4803Ce8E17aC61F82312Ed4e3a43291c10f76d"
+  //   );
+  //   // expect(false, "xxx");
+  // });
 
-  it.only("issue local", async () => {
+  it.skip("issue local", async () => {
     const fixture = await centralFixture(avalancheTestnetRealToken);
 
     await fixture.initController();
