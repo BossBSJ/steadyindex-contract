@@ -125,6 +125,11 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
         for (uint256 i = 0; i < _tokenOuts.length; i++) {
             path[2] = _tokenOuts[i];
 
+            console.log(
+                "Remaining balance: %s",
+                IERC20(_tokenIn).balanceOf(address(this))
+            );
+
             if (_tokenOuts[i] == WAVAX_ADDRESS) {
                 address[] memory tmpPath = new address[](2);
                 tmpPath[0] = path[0];
@@ -139,6 +144,8 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
                 )[0];
                 console.log("swaped %s with use %s", i, amountInUsed);
                 totalAmountInUsed += amountInUsed;
+            } else if (path[2] == _tokenIn) {
+                IERC20(_tokenIn).transfer(_receiver, _amountOuts[i]);
             } else {
                 console.log(
                     "Calculate will use: %s",

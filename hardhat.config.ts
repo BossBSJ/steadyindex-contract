@@ -44,7 +44,7 @@ const config: HardhatUserConfig = {
       accounts: [ACCOUNT_PRIVATE_KEY],
     },
     hardhat: {
-      forking: forking.avalanche,
+      forking: forking.fuji,
       accounts: [
         { privateKey: ACCOUNT_PRIVATE_KEY, balance: ethers.utils.parseEther('1000000000000').toString() },
       ],
@@ -57,3 +57,17 @@ const config: HardhatUserConfig = {
 };
 
 export default config;
+
+// module.exports = {
+//   networks: {
+//     fuji: {
+//       chainId: 43113,
+//       gasPrice: 225000000000,
+//       url: "https://api.avax-test.network/ext/bc/C/rpc",
+//       accounts: [ACCOUNT_PRIVATE_KEY],
+//     }
+//   },
+//   etherscan: {
+//     apiKey: SNOWTRACE_API
+//   }
+// };

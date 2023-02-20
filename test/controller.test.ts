@@ -48,6 +48,7 @@ describe("Controller", () => {
 
     return { amountIn };
   };
+  
   const issueWAVAXIndexToken = async () => {
     const { addrApproveTokenForSpender } = await centralFixture();
     const components = await WAVAXIndex.getPositions();
@@ -64,10 +65,6 @@ describe("Controller", () => {
 
     const wavaxSumAmount = [...wavaxAmounts, ...components.filter(comp => comp.component == wavax).map(comp => comp.unit)].reduce((accum, current) => accum.add(current))
 
-    // const [wethAmountIn1, wethAmountIn2] = await Promise.all([
-    //   (await router.getAmountsIn(components[0].unit, [wavax, tokenA]))[0],
-    //   (await router.getAmountsIn(components[1].unit, [wavax, tokenB]))[0],
-    // ]);
     const _amountIn = (
       await router.getAmountsIn(
         wavaxSumAmount,
