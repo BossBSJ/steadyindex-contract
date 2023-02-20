@@ -19,9 +19,9 @@ export const avalancheTestnet = {
 
 export const avalancheTestnetRealToken = {
   joeRouter02: "0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901",
-  tokenA: "0x0b9d5d9136855f6fec3c0993fee6e9ce8a297846", // link
-  tokenB: "0xb6076c93701d6a07266c31066b298aec6dd65c2d", // usdc
-  tokenC: "0xab231a5744c8e6c45481754928ccffffd4aa0732", // usdt
+  tokenA: "0x0b9d5d9136855f6fec3c0993fee6e9ce8a297846", // link 18
+  tokenB: "0xb6076c93701d6a07266c31066b298aec6dd65c2d", // usdc 6
+  tokenC: "0xab231a5744c8e6c45481754928ccffffd4aa0732", // usdt 6
   wavax: "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
   lbRouter: "0x7b50046cEC8252ca835b148b1eDD997319120a12",
 };

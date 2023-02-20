@@ -1,9 +1,9 @@
-import { MyAddr, avalancheTestnet, toE18 } from "../constant";
+import { MyAddr, avalancheTestnetRealToken, toE18 } from "../constant";
 
 const components = {
-  A: { addr: avalancheTestnet.tokenA, unit: 25e6 },
-  B: { addr: avalancheTestnet.tokenB, unit: 75e6 },
-};
+  A: { addr: avalancheTestnetRealToken.tokenA, unit: 25e6 },
+  B: { addr: avalancheTestnetRealToken.tokenB, unit: 75e6 },
+}
 
 module.exports = [
   [components.A.addr, components.B.addr],
@@ -12,5 +12,5 @@ module.exports = [
   MyAddr,
   "FirstIndex",
   "IDX",
-  "0x7841a92e43dce8ba861941b62fde6da39a174ae5"
+  "0x5166e01ff55bC806E7bCF4eac70aF154174f0dBf" // 
 ];
