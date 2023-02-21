@@ -57,29 +57,47 @@ contract MultiAssetSwapper is IMultiAssetSwapper {
             );
         }
 
-        address[] memory path = new address[](3);
-        uint256 amountOut = 0;
+        address[] memory path = new address[](2);
+        uint256 wavaxAmount = 0;
         for (uint256 i = 0; i < _tokenIns.length; i++) {
+            if (_tokenIns[i] == WAVAX_ADDRESS) {
+                wavaxAmount += _amountIns[i];
+                continue;
+            }
+
             path[0] = _tokenIns[i];
             path[1] = WAVAX_ADDRESS;
-            path[2] = _tokenOut;
 
-            uint256 receivedAmount = router.swapExactTokensForTokens(
+            uint256 receivedWavaxAmount = router.swapExactTokensForTokens(
                 _amountIns[i],
                 0,
                 path,
-                _receiver,
+                address(this),
                 block.timestamp + 60
             )[1];
 
             require(
-                receivedAmount > 0,
+                receivedWavaxAmount > 0,
                 "Invalid received amount, Swap tokenIn"
             );
 
-            amountOut += receivedAmount;
+            wavaxAmount += receivedWavaxAmount;
         }
-        require(amountOut > _minAmountOut, "Invalid amount out");
+
+        _approveTokenForSpender(WAVAX_ADDRESS, address(router), wavaxAmount);
+        
+        path[0] = WAVAX_ADDRESS;
+        path[1] = _tokenOut;
+
+        uint256 receivedAmount = router.swapExactTokensForTokens(
+            wavaxAmount,
+            0,
+            path,
+            _receiver,
+            block.timestamp + 60
+        )[1];
+
+        require(receivedAmount > _minAmountOut, "Invalid amount out");
     }
 
     function swapTokenForMultiTokens(
