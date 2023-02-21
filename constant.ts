@@ -6,7 +6,8 @@ import { ethers } from "ethers";
 // export const tokenC = "0x8e620499181e7f5f548Ac16eE9ce394e033a9954";
 // export const wethAddr = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
 
-export const MyAddr = "0x4A4803Ce8E17aC61F82312Ed4e3a43291c10f76d";
+// export const MyAddr = "0x4A4803Ce8E17aC61F82312Ed4e3a43291c10f76d";
+export const MyAddr = "0xA4C7b6667527B65Ff554dE9f89cbFA0098624BA6"
 
 export const avalancheTestnet = {
   joeRouter02: "0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901",
