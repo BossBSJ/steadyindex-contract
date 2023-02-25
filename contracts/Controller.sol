@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.0;
 
 import {IMultiAssetSwapper} from "../interfaces/IMultiAssetSwapper.sol";
 import {IIndexToken} from "../interfaces/IIndexToken.sol";
@@ -39,6 +39,9 @@ contract Controller {
 
     mapping(address => bool) isIndex;
 
+    uint256 private feeMultiplier;
+    uint256 private feeDivider;
+
     /* ============ Functions ============ */
     constructor() {
         admin = msg.sender;
@@ -48,10 +51,14 @@ contract Controller {
 
     function initialize(
         address _indexTokenFactory,
-        IMultiAssetSwapper _multiAssetSwaper
+        IMultiAssetSwapper _multiAssetSwaper,
+        uint256 _feeMultiplier,
+        uint256 _feeDivider
     ) external onlyAdmin {
         indexTokenFactory = _indexTokenFactory;
         multiAssetSwaper = _multiAssetSwaper;
+        feeMultiplier = _feeMultiplier;
+        feeDivider = _feeDivider;
     }
 
     function issueIndexToken(
@@ -186,7 +193,18 @@ contract Controller {
         path[0] = _tokenIn;
         path[1] = WAVAX_ADDRESS;
         uint256 _tokenInAmount = router.getAmountsIn(amountWrap, path)[0];
-        tokenInAmount = _tokenInAmount.add(_tokenInAmount.div(400));
+        tokenInAmount = _tokenInAmount.add(
+            _tokenInAmount.mul(feeMultiplier).div(feeDivider)
+        );
+    }
+
+    function getFee()
+        external
+        view
+        returns (uint256 _feeMultiplier, uint256 _feeDivider)
+    {
+        _feeMultiplier = feeMultiplier;
+        _feeDivider = feeDivider;
     }
 
     /* ============ Internal Functions ============ */
