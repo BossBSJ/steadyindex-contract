@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.17;
+pragma solidity ^0.8.0;
 
 import {IMultiAssetSwapper} from "../interfaces/IMultiAssetSwapper.sol";
 import {IIndexToken} from "../interfaces/IIndexToken.sol";
