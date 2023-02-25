@@ -36,7 +36,7 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
   }
 
   async function createDefaultIndex() {
-    const id = (await indexTokenFactory.getIndexs()).length
+    const id = (await indexTokenFactory.getIndexs()).length;
     await indexTokenFactory.createIndexToken(
       [tokenA, tokenB],
       [25e6, 75e6],
@@ -49,7 +49,7 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
   }
 
   async function createWAVAXIndex() {
-    const id = (await indexTokenFactory.getIndexs()).length
+    const id = (await indexTokenFactory.getIndexs()).length;
     await indexTokenFactory.createIndexToken(
       [tokenA, tokenB, wavax],
       [25e6, 25e6, 50e6],
@@ -64,7 +64,9 @@ export async function centralFixture(_avalanche: typeof avalanche = avalanche) {
   async function initController() {
     await controller.initialize(
       indexTokenFactory.address,
-      multiAssetSwapper.address
+      multiAssetSwapper.address,
+      1,
+      400
     );
   }
 

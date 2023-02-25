@@ -95,13 +95,8 @@ describe("Controller", () => {
     deployer = fixture.deployer;
     router = fixture.router;
     controller = fixture.controller;
-    const indexTokenFactory = fixture.indexTokenFactory;
-    const multiAssetSwapper = fixture.multiAssetSwapper;
 
-    await controller.initialize(
-      indexTokenFactory.address,
-      multiAssetSwapper.address
-    );
+    await fixture.initController();
 
     firstIndex = await fixture.createDefaultIndex();
     WAVAXIndex = await fixture.createWAVAXIndex();
