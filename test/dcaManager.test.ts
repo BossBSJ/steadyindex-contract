@@ -49,6 +49,7 @@ describe("DACManager", () => {
       indexToken.address,
       toE18(1),
       addresses.tokenC,
+      1000,
       100
       );
       
@@ -65,6 +66,7 @@ describe("DACManager", () => {
       indexToken.address,
       toE18(1),
       addresses.tokenC,
+      1000,
       1
     );
     await dcaManager.subscription(
@@ -72,6 +74,7 @@ describe("DACManager", () => {
       indexToken.address,
       toE18(1),
       addresses.tokenC,
+      1000,
       2
     );
     await dcaManager.subscription(
@@ -79,6 +82,7 @@ describe("DACManager", () => {
       indexToken.address,
       toE18(1),
       addresses.tokenC,
+      1000,
       3
     );
 
@@ -114,6 +118,7 @@ describe("DACManager", () => {
       indexToken.address,
       toE18(1),
       addresses.tokenC,
+      1000,
       100
     );
 
