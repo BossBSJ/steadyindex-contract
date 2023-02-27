@@ -29,11 +29,15 @@ async function main() {
   // const firstIndex = await fixture.getIndexToken(0);
 
   console.log({
-    controller: fixture.controller.address,
-    multiAssetSwapper: fixture.multiAssetSwapper.address,
-    indexTokenFactory: fixture.indexTokenFactory.address,
-    dcaManager: fixture.dcaManager.address
+    controller:fixture.controller.address,
+    multiAssetSwapper:fixture.multiAssetSwapper.address,
+    indexTokenFactory:fixture.indexTokenFactory.address,
+    dcaManager:fixture.dcaManager.address,
+    router:fixture.router.address,
+    addresses:fixture.addresses.wavax,
+    deployer:fixture.deployer.address,
   });
+  console.log()
   console.log(
     "for copy to verify contract (if the auto verify was failed):\n",
     "./verify.sh ",

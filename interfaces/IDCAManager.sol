@@ -6,6 +6,7 @@ interface IDCAManager {
     struct Investment {
         address trusted;
         address tokenIn;
+        uint256 tokenInAmount;
         address indexTokenAddr;
         uint256 lastBuy;
         uint256 cycle;
@@ -21,6 +22,7 @@ interface IDCAManager {
         address _indexTokenAddr,
         uint256 _indexTokenAmount,
         address _tokenIn,
+        uint256 _tokenInAmount,
         uint256 _cycle
     ) external;
 

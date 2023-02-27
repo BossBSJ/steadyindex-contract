@@ -51,6 +51,7 @@ contract DCAManager is IDCAManager {
         address _indexTokenAddr,
         uint256 _indexTokenAmount,
         address _tokenIn,
+        uint256 _tokenInAmount,
         uint256 _cycle
     ) external {
         address _investor = msg.sender;
@@ -59,6 +60,7 @@ contract DCAManager is IDCAManager {
         IDCAManager.Investment memory newInvestment = IDCAManager.Investment(
             _trustedAddr,
             _tokenIn,
+            _tokenInAmount,
             _indexTokenAddr,
             0,
             _cycle
