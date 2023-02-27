@@ -3,15 +3,15 @@ import { toE, toE18 } from "../constant";
 
 async function main () {
     await hre.run("verify:verify", {
-        address: "0xef69a701219a873a97e587c71b6c98d06da227dc", //
+        address: "0x13825e10479822b39577900fa7d032cDbCD76C52", //
         constructorArguments: [ //
-            ["0xd00ae08403B9bbb9124bB305C09058E32C39A48c", "0xB6076C93701D6a07266c31066B298AeC6dd65c2d"],
-            ["1673994362323798724", "14999944"],
-            [toE18(70), toE(30,18)],
+            ["0xB6076C93701D6a07266c31066B298AeC6dd65c2d"],
+            ["999022"],
+            [toE18(100)],
             "0xA4C7b6667527B65Ff554dE9f89cbFA0098624BA6",
-            "My Token Index",
-            "MTI",
-            "0xb1aAAfbC0E6c358441FA8C8BBA00EE31583f971A"
+            "Only USDC",
+            "USDS",
+            "0x4452Fb72fA923Bff70d543fF59f853d1129a3D79"
         ]
     })
     // console.log(ethers.utils.parseUnits("1.673994362323798724",18))

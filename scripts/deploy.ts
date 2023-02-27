@@ -65,20 +65,13 @@ main().catch((error) => {
 // npx hardhat verify --network goerli DEPLOYED_CONTRACT_ADDRESS "Constructor argument 1"
 // npx hardhat verify --network goerli 0xab4FaB62E68f17D39418bd8bf79f298B35284619 "0xE9fa08B395678eca3BD266dbfCB673e821a723E5"
 
-// {
-//   controller: '0xE9fa08B395678eca3BD266dbfCB673e821a723E5',
-//   multiAssetSwapper: '0x5B38086e6D0e2F4703D061847DA2bf4A36269e7e',
-//   indexTokenFactory: '0xab4FaB62E68f17D39418bd8bf79f298B35284619'
-// }
 
 // npx hardhat run --network fuji scripts/deploy.ts
 // npx hardhat verify --network fuji
 
-
-
 // {
-//   controller: '0x98B80EF20e6303a552F80FeDF437b21a45861fc1',
-//   multiAssetSwapper: '0x655398A317792DeEC897AbDe81C27dc2ff6E9901',
-//   indexTokenFactory: '0x3898eeb5A3fB5218640f58F69bC9116aAF49adEf',
-//   dcaManager: '0xB12b43c1CE28e86C7e33fFF959b8c3aC22C52274'
+//   controller: '0x4452Fb72fA923Bff70d543fF59f853d1129a3D79',
+//   multiAssetSwapper: '0x08bDB338E912B2d063cA4AFA85597e88c2598E4c',
+//   indexTokenFactory: '0x5A3673B6e906b5ab8b59A7A45321906837A29bC2',
+//   dcaManager: '0x3eA28ABa363Ec919286466bFBddb71Be8Fa3BCd2'
 // }
