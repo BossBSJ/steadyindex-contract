@@ -8,6 +8,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SignedSafeMath} from "@openzeppelin/contracts/utils/math/SignedSafeMath.sol";
 import {IIndexToken} from "../interfaces/IIndexToken.sol";
 import {PreciseUnitMath} from "../libs/PreciseUnitMath.sol";
@@ -24,6 +25,7 @@ import "hardhat/console.sol";
  * from the IndexToken.
  */
 contract IndexToken is ERC20 {
+    using Math for uint256;
     using SafeMath for uint256;
     using SafeCast for int256;
     using SafeCast for uint256;
@@ -201,14 +203,11 @@ contract IndexToken is ERC20 {
         onlyController
         whenUnlock
     {
-        (
-            address[] memory componentAddrs,
-            uint256[] memory units
-        ) = getComponentsForIndex(_quantity);
+        uint256[] memory actualReturns = _getActualReturnsFromIndex(_quantity);
 
-        for (uint256 i = 0; i < componentAddrs.length; i++) {
+        for (uint256 i = 0; i < components.length; i++) {
             require(
-                IERC20(componentAddrs[i]).transfer(_account, units[i]),
+                IERC20(components[i]).transfer(_account, actualReturns[i]),
                 "Failed to transfer"
             );
         }
@@ -340,6 +339,23 @@ contract IndexToken is ERC20 {
         }
 
         return positionCount;
+    }
+
+    function _getActualReturnsFromIndex(uint256 amount)
+        private
+        view
+        returns (uint256[] memory)
+    {
+        uint256[] memory actualReturns = new uint256[](components.length);
+        for (uint256 i = 0; i < components.length; i++) {
+            uint256 balance = IERC20(components[i]).balanceOf(address(this));
+            uint256 _totalSupply = totalSupply();
+            actualReturns[i] = _totalSupply.min(
+                amount.mul(balance).div(_totalSupply)
+            );
+        }
+
+        return actualReturns;
     }
 
     function _validateOnlyManager() internal view {

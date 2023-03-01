@@ -14,7 +14,7 @@ describe("MultiAssetSwapper", () => {
   let router: IJoeRouter02;
   let ERC20: ERC20__factory;
 
-  before(async () => {
+  beforeEach(async () => {
     const fixture = await centralFixture();
     await fixture.autoSwapIfNoBalance();
     deployer = fixture.deployer;

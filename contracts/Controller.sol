@@ -5,6 +5,7 @@ pragma solidity ^0.8.0;
 import {IMultiAssetSwapper} from "../interfaces/IMultiAssetSwapper.sol";
 import {IIndexToken} from "../interfaces/IIndexToken.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IJoeRouter02} from "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeRouter02.sol";
 
@@ -109,6 +110,8 @@ contract Controller {
         uint256 _minAmountOut,
         address _to
     ) external {
+        console.log();
+        console.log("redeemIndexToken");
         IIndexToken indexToken = IIndexToken(_indexToken);
         require(isIndex[_indexToken], "Index doesn't exists");
         require(
@@ -116,22 +119,26 @@ contract Controller {
                 _indexTokenAmount,
             "Insufficient allowance"
         );
-        (address[] memory tokenIns, uint256[] memory amountIns) = indexToken
-            .getComponentsForIndex(_indexTokenAmount);
-
         indexToken.transferFrom(msg.sender, address(this), _indexTokenAmount);
         indexToken.burn(address(this), _indexTokenAmount);
 
-        for (uint256 i = 0; i < tokenIns.length; i++) {
+        address[] memory components = indexToken.getComponents();
+        uint256[] memory amountIns = new uint256[](components.length);
+        for (uint256 i = 0; i < components.length; i++) {
+            amountIns[i] = IERC20(components[i]).balanceOf(address(this));
+            console.log("%s : %s", i, amountIns[i]);
+        }
+
+        for (uint256 i = 0; i < components.length; i++) {
             _approveTokenForSpender(
-                tokenIns[i],
+                components[i],
                 address(multiAssetSwaper),
                 amountIns[i]
             );
         }
 
         multiAssetSwaper.swapMultiTokensForToken(
-            tokenIns,
+            components,
             amountIns,
             _minAmountOut,
             _tokenOut,

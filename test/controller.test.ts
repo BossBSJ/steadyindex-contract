@@ -48,7 +48,7 @@ describe("Controller", () => {
 
     return { amountIn };
   };
-  
+
   const issueWAVAXIndexToken = async () => {
     const { addrApproveTokenForSpender } = await centralFixture();
     const components = await WAVAXIndex.getPositions();
@@ -63,13 +63,15 @@ describe("Controller", () => {
         )
     );
 
-    const wavaxSumAmount = [...wavaxAmounts, ...components.filter(comp => comp.component == wavax).map(comp => comp.unit)].reduce((accum, current) => accum.add(current))
+    const wavaxSumAmount = [
+      ...wavaxAmounts,
+      ...components
+        .filter((comp) => comp.component == wavax)
+        .map((comp) => comp.unit),
+    ].reduce((accum, current) => accum.add(current));
 
     const _amountIn = (
-      await router.getAmountsIn(
-        wavaxSumAmount,
-        [tokenC, wavax]
-      )
+      await router.getAmountsIn(wavaxSumAmount, [tokenC, wavax])
     )[0];
     const amountIn = _amountIn.add(_amountIn.div(400));
 
@@ -89,7 +91,7 @@ describe("Controller", () => {
     return { amountIn };
   };
 
-  before(async () => {
+  beforeEach(async () => {
     const fixture = await centralFixture();
     await fixture.autoSwapIfNoBalance();
     deployer = fixture.deployer;
@@ -148,12 +150,17 @@ describe("Controller", () => {
     const { getTokensBalanceOf, addrApproveTokenForSpender } =
       await centralFixture();
 
-    await issueFirstIndexToken();
+    const [_tokenCBal] = await getTokensBalanceOf([tokenC]);
 
-    const [_tokenCBal, _firstIdxBal] = await getTokensBalanceOf([
+    const { amountIn } = await issueFirstIndexToken();
+
+    const [_tokenCBal2, _firstIdxBal] = await getTokensBalanceOf([
       tokenC,
       firstIndex.address,
     ]);
+    expect(_tokenCBal, "check tokenCBal bf redeem").to.equal(
+      _tokenCBal2.add(amountIn)
+    );
 
     await addrApproveTokenForSpender(
       firstIndex.address,
@@ -174,19 +181,32 @@ describe("Controller", () => {
       firstIndex.address,
     ]);
 
+    console.log(
+      tokenCBal.toString(),
+      _tokenCBal.toString(),
+      _tokenCBal2.toString()
+    );
     expect(firstIdxBal, "firstIndex balance ").to.equal("0");
-    expect(tokenCBal, "tokenC balance").to.greaterThan(_tokenCBal);
+    expect(tokenCBal, "tokenC balance").to.approximately(
+      _tokenCBal,
+      _tokenCBal.div(1000)
+    );
   });
 
   it("redeemIndexToken half balance", async () => {
     const { getTokensBalanceOf, addrApproveTokenForSpender } =
       await centralFixture();
 
-    await issueFirstIndexToken();
-    const [_tokenCBal, _firstIdxBal] = await getTokensBalanceOf([
+    const [_tokenCBal] = await getTokensBalanceOf([tokenC]);
+    const { amountIn } = await issueFirstIndexToken();
+    const [_tokenCBal2, _firstIdxBal] = await getTokensBalanceOf([
       tokenC,
       firstIndex.address,
     ]);
+
+    expect(_tokenCBal, "check tokenCBal bf redeem").to.equal(
+      _tokenCBal2.add(amountIn)
+    );
 
     await addrApproveTokenForSpender(
       firstIndex.address,
@@ -208,6 +228,9 @@ describe("Controller", () => {
     ]);
 
     expect(firstIdxBal, "firstIndex balance ").to.equal(_firstIdxBal.div(2));
-    expect(tokenCBal, "tokenC balance").to.greaterThan(_tokenCBal);
+    expect(tokenCBal, "tokenC balance").to.approximately(
+      _tokenCBal.sub(amountIn.div(2)),
+      _tokenCBal.sub(amountIn.div(2)).div(100)
+    );
   });
 });
