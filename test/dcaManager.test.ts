@@ -15,7 +15,7 @@ describe("DACManager", () => {
     accountAddr?: string
   ) => Promise<BigNumber[]>;
 
-  before(async () => {
+  beforeEach(async () => {
     const fixture = await centralFixture();
     fixture.autoSwapIfNoBalance();
 
