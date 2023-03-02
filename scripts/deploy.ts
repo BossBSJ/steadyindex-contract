@@ -73,9 +73,14 @@ main().catch((error) => {
 // npx hardhat run --network fuji scripts/deploy.ts
 // npx hardhat verify --network fuji
 
+//fuji
 // {
-//   controller: '0x4452Fb72fA923Bff70d543fF59f853d1129a3D79',
-//   multiAssetSwapper: '0x08bDB338E912B2d063cA4AFA85597e88c2598E4c',
-//   indexTokenFactory: '0x5A3673B6e906b5ab8b59A7A45321906837A29bC2',
-//   dcaManager: '0x3eA28ABa363Ec919286466bFBddb71Be8Fa3BCd2'
+//   controller: '0x79344A4A31905c64390C42e3be89c183FCD35789',
+//   multiAssetSwapper: '0x37Ee0524146c1449c23b04B05151E0b670FD193a',
+//   indexTokenFactory: '0x16C54485Dee21B449A56dcEd688e8cED21eA8A25',
+//   dcaManager: '0x5424733818873Cb67719945cab27535429b5FaBF',
+//   router: '0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901',
+//   addresses: '0xd00ae08403B9bbb9124bB305C09058E32C39A48c',
+//   deployer: '0xA4C7b6667527B65Ff554dE9f89cbFA0098624BA6'
 // }
+
