@@ -7,10 +7,12 @@ async function main() {
   const components = {
     A: { addr: avalanche.tokenA, unit: 50e6 },
     B: { addr: avalanche.tokenB, unit: 50e6 },
+    // A: { addr: avalancheTestnetRealToken.tokenB, unit: 50e6 },
+    // B: { addr: avalancheTestnetRealToken.tokenC, unit: 50e6 },
   };
 
-  // const fixture = await centralFixture(avalancheTestnetRealToken);
   const fixture = await centralFixture();
+  // const fixture = await centralFixture(avalancheTestnetRealToken);
 
   console.log(
     "Deploying contracts with the account:",
@@ -77,10 +79,10 @@ main().catch((error) => {
 
 // fuji
 // {
-//   controller: '0xf0b7Ba9BE0D806136E86b8415038f57daC720c92',
-//   multiAssetSwapper: '0x22885a8f4165F61ef1F2D98702D045CA548374Fe',
-//   indexTokenFactory: '0x933DEECC49184e8af9B94004812075d748E584Ee',
-//   dcaManager: '0xD321ca0e25C3417fE012FC607C5543a478cCd302',
+//   controller: '0xfb17F057169643136B1639a776651C39355CF519',
+//   multiAssetSwapper: '0x498B9473f09494BD21a4D948E9166F38046A5930',
+//   indexTokenFactory: '0x41343c4FA023298F89C03884C7F33677C0ba16C7',
+//   dcaManager: '0x00DEAEeE69A56750b7Ede732588C9cDbE11f0f67',
 //   router: '0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901',
 //   addresses: '0xd00ae08403B9bbb9124bB305C09058E32C39A48c',
 //   deployer: '0xA4C7b6667527B65Ff554dE9f89cbFA0098624BA6'

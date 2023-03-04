@@ -25,6 +25,7 @@ const forking: Record<NetworkSupport, HardhatNetworkForkingUserConfig> = {
 
 
 const ACCOUNT_PRIVATE_KEY = "b1a0bffff5a833f3cea964f8b89781309231f0945063930a3d67d3ed15a57a71"
+const ACCOUNT_PRIVATE_KEY2 = "95bf2ac35c7387a867f1dde790c4ad54ca6edfd0323234e2d6e40b1a82133b81"
 const INFURA_API_KEY = "277bc7d8706548eda0e105d5b4c4c7ff"
 const SNOWTRACE_API = "WCJYM7T7SSI4DDBH9GV9HAVGP7RVB5JWX3"
 
@@ -54,6 +55,7 @@ const config: HardhatUserConfig = {
       forking: forking.avalanche,
       accounts: [
         { privateKey: ACCOUNT_PRIVATE_KEY, balance: ethers.utils.parseEther('1000000000000').toString() },
+        { privateKey: ACCOUNT_PRIVATE_KEY2, balance: ethers.utils.parseEther('1000000000000').toString() },
       ],
     },
   },

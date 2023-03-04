@@ -100,7 +100,9 @@ contract DCAManager is IDCAManager {
         IDCAManager.Investment memory investment = investments[_investor][
             _investmentId
         ];
-        _validateOnlyTruste(investment.trusted);
+        if(msg.sender != _investor) {
+            _validateOnlyTruste(investment.trusted);
+        }
 
         require(
             investment.lastBuy + investment.cycle <= block.timestamp,

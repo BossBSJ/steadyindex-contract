@@ -20,7 +20,7 @@ async function main() {
     [avalanche.wavax, usdcAddress],
     deployer.address,
     Math.floor(Date.now() / 1000) + 60 * 10,
-    { value: hre.ethers.utils.parseEther("100") }
+    { value: hre.ethers.utils.parseEther("10000") }
   )
 
 

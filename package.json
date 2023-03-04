@@ -10,6 +10,7 @@
     "deploy:fuji": "npx hardhat run scripts/deploy.ts --network fuji",
     "deploy:goerli": "npx hardhat run scripts/deploy.ts --network goerli",
     "deploy:localhost": "npx hardhat run scripts/deploy.ts --network localhost",
+    "frontendSetup:localhost": "npx hardhat run scripts/frontendSetup.ts --network localhost",
     "debug": "npx hardhat run scripts/debug.ts --network goerli",
     "test": "npx hardhat test"
   },

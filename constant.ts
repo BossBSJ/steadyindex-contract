@@ -8,6 +8,7 @@ import { ethers } from "ethers";
 
 // export const MyAddr = "0x4A4803Ce8E17aC61F82312Ed4e3a43291c10f76d";
 export const MyAddr = "0xA4C7b6667527B65Ff554dE9f89cbFA0098624BA6"
+export const MyAddr2 = "0xD284F0e2AF3a8734A4d98E3ff40e155187490F52"
 
 export const avalancheTestnet = {
   joeRouter02: "0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901",
