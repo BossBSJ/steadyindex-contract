@@ -7,7 +7,7 @@ dcaManager=$4
 router=$5
 wavax=$6
 deployer=$7
-fistIndexToken=$8
+# fistIndexToken=$8
 
 npx hardhat verify --network fuji $indexTokenFactory $controller
 npx hardhat verify --network fuji $controller
