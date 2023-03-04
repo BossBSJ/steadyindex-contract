@@ -1,15 +1,16 @@
 import hre from "hardhat";
 import { centralFixture } from "../test/shares/fixtures";
-import { MyAddr, avalancheTestnetRealToken, toE, toE18 } from "../constant";
+import { MyAddr, avalancheTestnetRealToken, toE, toE18, avalanche } from "../constant";
 
 
 async function main() {
   const components = {
-    A: { addr: avalancheTestnetRealToken.tokenA, unit: 25e18 },
-    B: { addr: avalancheTestnetRealToken.tokenB, unit: 75e6 },
+    A: { addr: avalanche.tokenA, unit: 50e6 },
+    B: { addr: avalanche.tokenB, unit: 50e6 },
   };
 
-  const fixture = await centralFixture(avalancheTestnetRealToken);
+  // const fixture = await centralFixture(avalancheTestnetRealToken);
+  const fixture = await centralFixture();
 
   console.log(
     "Deploying contracts with the account:",
@@ -17,16 +18,16 @@ async function main() {
   );
 
   await fixture.initController();
-  // await fixture.indexTokenFactory.createIndexToken(
-  //   [components.A.addr, components.B.addr],
-  //   [components.A.unit, components.B.unit],
-  //   [toE18(25), toE(75,6)],
-  //   fixture.deployer.address,
-  //   "FirstIndex",
-  //   "IDX"
-  // );
+  await fixture.indexTokenFactory.createIndexToken(
+    [components.A.addr, components.B.addr],
+    [components.A.unit, components.B.unit],
+    [toE18(70), toE18(30)],
+    fixture.deployer.address,
+    "FirstIndex",
+    "IDX"
+  );
 
-  // const firstIndex = await fixture.getIndexToken(0);
+  const firstIndex = await fixture.getIndexToken(0);
 
   console.log({
     controller:fixture.controller.address,
@@ -48,7 +49,7 @@ async function main() {
     fixture.router.address,
     fixture.addresses.wavax,
     fixture.deployer.address,
-    // firstIndex.address,
+    firstIndex.address,
     '\n'
   );
 
@@ -73,14 +74,26 @@ main().catch((error) => {
 // npx hardhat run --network fuji scripts/deploy.ts
 // npx hardhat verify --network fuji
 
-//fuji
+
+// fuji
 // {
-//   controller: '0x79344A4A31905c64390C42e3be89c183FCD35789',
-//   multiAssetSwapper: '0x37Ee0524146c1449c23b04B05151E0b670FD193a',
-//   indexTokenFactory: '0x16C54485Dee21B449A56dcEd688e8cED21eA8A25',
-//   dcaManager: '0x5424733818873Cb67719945cab27535429b5FaBF',
+//   controller: '0xf0b7Ba9BE0D806136E86b8415038f57daC720c92',
+//   multiAssetSwapper: '0x22885a8f4165F61ef1F2D98702D045CA548374Fe',
+//   indexTokenFactory: '0x933DEECC49184e8af9B94004812075d748E584Ee',
+//   dcaManager: '0xD321ca0e25C3417fE012FC607C5543a478cCd302',
 //   router: '0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901',
 //   addresses: '0xd00ae08403B9bbb9124bB305C09058E32C39A48c',
 //   deployer: '0xA4C7b6667527B65Ff554dE9f89cbFA0098624BA6'
 // }
 
+
+//localhost
+// {
+//   controller: '0xac86Da4159A4870B8d28a22985045Db4424F12A3',
+//   multiAssetSwapper: '0xdC6d26e19d7301380BCFB2241a6BeF1Da9C76267',
+//   indexTokenFactory: '0x0Ac530201056b24286Cc45C9996BABfA96E807B7',
+//   dcaManager: '0x2cBb031204EDc608307445f14957A58b942cbD96',
+//   router: '0x60aE616a2155Ee3d9A68541Ba4544862310933d4',
+//   addresses: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
+//   deployer: '0xA4C7b6667527B65Ff554dE9f89cbFA0098624BA6'
+// }
