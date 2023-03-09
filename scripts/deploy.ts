@@ -1,6 +1,8 @@
 import hre from "hardhat";
 import { centralFixture } from "../test/shares/fixtures";
 import { MyAddr, avalancheTestnetRealToken, toE, toE18, avalanche } from "../constant";
+import { erc20Service } from "../services/erc20Service";
+
 
 
 async function main() {
@@ -23,11 +25,31 @@ async function main() {
   await fixture.indexTokenFactory.createIndexToken(
     [components.A.addr, components.B.addr],
     [components.A.unit, components.B.unit],
-    [toE18(70), toE18(30)],
+    [toE18(50), toE18(50)],
     fixture.deployer.address,
     "FirstIndex",
-    "IDX"
+    "FIDX"
   );
+
+  // const startPrice = 2000
+  // const price1 = await erc20Service.fetchERC20Price("0x50b7545627a5162F82A992c33b87aDc75187B218")
+  // const price2 = await erc20Service.fetchERC20Price("0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB")
+  // const amount1 = startPrice * (50/100) / 22000
+  // const amount2 = startPrice * (50/100) / 1500
+  // const unit1 = toE18(Number(amount1.toFixed(18)))
+  // const unit2 = toE18(Number(amount2.toFixed(18)))
+  // const components2 = {
+  //   WBTC: {addr: "0x50b7545627a5162F82A992c33b87aDc75187B218", unit: unit1, strategicUnit: toE18(50)},
+  //   WETH: {addr: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB", unit: unit2, strategicUnit: toE18(50)}
+  // }
+  // await fixture.indexTokenFactory.createIndexToken(
+  //   [components2.WBTC.addr, components2.WETH.addr],
+  //   [components2.WBTC.unit, components2.WETH.unit],
+  //   [components2.WBTC.strategicUnit, components2.WETH.strategicUnit],
+  //   fixture.deployer.address,
+  //   "SecondIndex",
+  //   "SIDX"
+  // )
 
   const firstIndex = await fixture.getIndexToken(0);
 

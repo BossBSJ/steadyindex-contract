@@ -12,7 +12,9 @@
     "deploy:localhost": "npx hardhat run scripts/deploy.ts --network localhost",
     "frontendSetup:localhost": "npx hardhat run scripts/frontendSetup.ts --network localhost",
     "debug": "npx hardhat run scripts/debug.ts --network goerli",
-    "test": "npx hardhat test"
+    "test": "npx hardhat test",
+    "dca:localhost": "npx hardhat run --network localhost scripts/dca.ts",
+    "blockTime:localhost": "npx hardhat run --network localhost scripts/blockTimestamp.ts"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
@@ -40,6 +42,8 @@
     "@openzeppelin/contracts": "^4.8.0",
     "@traderjoe-xyz/core": "^2.4.6",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
-    "bignumber.js": "^9.1.1"
+    "axios": "^1.3.4",
+    "bignumber.js": "^9.1.1",
+    "wagmi": "^0.11.7"
   }
 }

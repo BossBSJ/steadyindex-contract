@@ -20,7 +20,7 @@ contract DCAManager is IDCAManager {
     address public admin;
     IController public controller;
     // trustedAddr -> investorAddr -> is investor retgister with this trustedAddr
-    mapping(address => mapping(address => bool)) public investorsRegistered;
+    mapping(address => mapping(address => bool)) private investorsRegistered;
     // trustedAddr -> investorAddrs[] -- investroAddr -> invextment
     mapping(address => address[]) public investors;
     mapping(address => IDCAManager.Investment[]) public investments;
@@ -32,6 +32,14 @@ contract DCAManager is IDCAManager {
     }
 
     /* ============ External Functions ============ */
+    function getInvestorsForTrustedAddr(address _truestedAddr)
+        external
+        view
+        returns (address[] memory)
+    {
+        return investors[_truestedAddr];
+    }
+
     function InvestmentsForAccount(address _investor)
         external
         view
@@ -100,7 +108,7 @@ contract DCAManager is IDCAManager {
         IDCAManager.Investment memory investment = investments[_investor][
             _investmentId
         ];
-        if(msg.sender != _investor) {
+        if (msg.sender != _investor) {
             _validateOnlyTruste(investment.trusted);
         }
 
