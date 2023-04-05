@@ -1,15 +1,20 @@
 import hre from "hardhat";
 import { centralFixture } from "../test/shares/fixtures";
-import { MyAddr, avalancheTestnetRealToken, toE, toE18 } from "../constant";
+import { MyAddr, avalancheTestnetRealToken, toE, toE18, avalanche } from "../constant";
+import { erc20Service } from "../services/erc20Service";
+
 
 
 async function main() {
   const components = {
-    A: { addr: avalancheTestnetRealToken.tokenA, unit: 25e18 },
-    B: { addr: avalancheTestnetRealToken.tokenB, unit: 75e6 },
+    A: { addr: avalanche.tokenA, unit: 50e6 },
+    B: { addr: avalanche.tokenB, unit: 50e6 },
+    // A: { addr: avalancheTestnetRealToken.tokenB, unit: 50e6 },
+    // B: { addr: avalancheTestnetRealToken.tokenC, unit: 50e6 },
   };
 
-  const fixture = await centralFixture(avalancheTestnetRealToken);
+  const fixture = await centralFixture();
+  // const fixture = await centralFixture(avalancheTestnetRealToken);
 
   console.log(
     "Deploying contracts with the account:",
@@ -17,16 +22,36 @@ async function main() {
   );
 
   await fixture.initController();
-  // await fixture.indexTokenFactory.createIndexToken(
-  //   [components.A.addr, components.B.addr],
-  //   [components.A.unit, components.B.unit],
-  //   [toE18(25), toE(75,6)],
-  //   fixture.deployer.address,
-  //   "FirstIndex",
-  //   "IDX"
-  // );
+  await fixture.indexTokenFactory.createIndexToken(
+    [components.A.addr, components.B.addr],
+    [components.A.unit, components.B.unit],
+    [toE18(50), toE18(50)],
+    fixture.deployer.address,
+    "FirstIndex",
+    "FIDX"
+  );
 
-  // const firstIndex = await fixture.getIndexToken(0);
+  // const startPrice = 2000
+  // const price1 = await erc20Service.fetchERC20Price("0x50b7545627a5162F82A992c33b87aDc75187B218")
+  // const price2 = await erc20Service.fetchERC20Price("0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB")
+  // const amount1 = startPrice * (50/100) / 22000
+  // const amount2 = startPrice * (50/100) / 1500
+  // const unit1 = toE18(Number(amount1.toFixed(18)))
+  // const unit2 = toE18(Number(amount2.toFixed(18)))
+  // const components2 = {
+  //   WBTC: {addr: "0x50b7545627a5162F82A992c33b87aDc75187B218", unit: unit1, strategicUnit: toE18(50)},
+  //   WETH: {addr: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB", unit: unit2, strategicUnit: toE18(50)}
+  // }
+  // await fixture.indexTokenFactory.createIndexToken(
+  //   [components2.WBTC.addr, components2.WETH.addr],
+  //   [components2.WBTC.unit, components2.WETH.unit],
+  //   [components2.WBTC.strategicUnit, components2.WETH.strategicUnit],
+  //   fixture.deployer.address,
+  //   "SecondIndex",
+  //   "SIDX"
+  // )
+
+  const firstIndex = await fixture.getIndexToken(0);
 
   console.log({
     controller:fixture.controller.address,
@@ -48,7 +73,7 @@ async function main() {
     fixture.router.address,
     fixture.addresses.wavax,
     fixture.deployer.address,
-    // firstIndex.address,
+    firstIndex.address,
     '\n'
   );
 
@@ -73,14 +98,26 @@ main().catch((error) => {
 // npx hardhat run --network fuji scripts/deploy.ts
 // npx hardhat verify --network fuji
 
-//fuji
+
+// fuji
 // {
-//   controller: '0x79344A4A31905c64390C42e3be89c183FCD35789',
-//   multiAssetSwapper: '0x37Ee0524146c1449c23b04B05151E0b670FD193a',
-//   indexTokenFactory: '0x16C54485Dee21B449A56dcEd688e8cED21eA8A25',
-//   dcaManager: '0x5424733818873Cb67719945cab27535429b5FaBF',
+//   controller: '0xfb17F057169643136B1639a776651C39355CF519',
+//   multiAssetSwapper: '0x498B9473f09494BD21a4D948E9166F38046A5930',
+//   indexTokenFactory: '0x41343c4FA023298F89C03884C7F33677C0ba16C7',
+//   dcaManager: '0x00DEAEeE69A56750b7Ede732588C9cDbE11f0f67',
 //   router: '0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901',
 //   addresses: '0xd00ae08403B9bbb9124bB305C09058E32C39A48c',
 //   deployer: '0xA4C7b6667527B65Ff554dE9f89cbFA0098624BA6'
 // }
 
+
+//localhost
+// {
+//   controller: '0xac86Da4159A4870B8d28a22985045Db4424F12A3',
+//   multiAssetSwapper: '0xdC6d26e19d7301380BCFB2241a6BeF1Da9C76267',
+//   indexTokenFactory: '0x0Ac530201056b24286Cc45C9996BABfA96E807B7',
+//   dcaManager: '0x2cBb031204EDc608307445f14957A58b942cbD96',
+//   router: '0x60aE616a2155Ee3d9A68541Ba4544862310933d4',
+//   addresses: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
+//   deployer: '0xA4C7b6667527B65Ff554dE9f89cbFA0098624BA6'
+// }

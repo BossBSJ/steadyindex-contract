@@ -19,6 +19,8 @@ contract DCAManager is IDCAManager {
     /* ============ State Variables ============ */
     address public admin;
     IController public controller;
+    // trustedAddr -> investorAddr -> is investor retgister with this trustedAddr
+    mapping(address => mapping(address => bool)) private investorsRegistered;
     // trustedAddr -> investorAddrs[] -- investroAddr -> invextment
     mapping(address => address[]) public investors;
     mapping(address => IDCAManager.Investment[]) public investments;
@@ -30,6 +32,14 @@ contract DCAManager is IDCAManager {
     }
 
     /* ============ External Functions ============ */
+    function getInvestorsForTrustedAddr(address _truestedAddr)
+        external
+        view
+        returns (address[] memory)
+    {
+        return investors[_truestedAddr];
+    }
+
     function InvestmentsForAccount(address _investor)
         external
         view
@@ -55,6 +65,14 @@ contract DCAManager is IDCAManager {
         uint256 _cycle
     ) external {
         address _investor = msg.sender;
+
+        if (!investorsRegistered[_trustedAddr][_investor]) {
+            address[] storage investorsByTrustedAddr = investors[_trustedAddr];
+            investorsByTrustedAddr.push(_investor);
+            investors[_trustedAddr] = investorsByTrustedAddr;
+            investorsRegistered[_trustedAddr][_investor] = true;
+        }
+
         IDCAManager.Investment[] storage investment = investments[_investor];
         uint256 investmentId = investment.length;
         IDCAManager.Investment memory newInvestment = IDCAManager.Investment(
@@ -67,17 +85,18 @@ contract DCAManager is IDCAManager {
         );
 
         investment.push(newInvestment);
+        investments[_investor] = investment;
+
         buyFor(_investor, investmentId, _indexTokenAmount);
     }
 
     function unsubscription(uint256 _investmentId) external {
         IDCAManager.Investment[] storage investment = investments[msg.sender];
         require(investment.length > _investmentId, "Out of range Investments");
-        for (uint256 i = _investmentId; i < investment.length-1; i++) {
+        for (uint256 i = _investmentId; i < investment.length - 1; i++) {
             investment[i] = investment[i + 1];
         }
         investment.pop();
-
         investments[msg.sender] = investment;
     }
 
@@ -89,7 +108,9 @@ contract DCAManager is IDCAManager {
         IDCAManager.Investment memory investment = investments[_investor][
             _investmentId
         ];
-        _validateOnlyTruste(investment.trusted);
+        if (msg.sender != _investor) {
+            _validateOnlyTruste(investment.trusted);
+        }
 
         require(
             investment.lastBuy + investment.cycle <= block.timestamp,
@@ -108,7 +129,7 @@ contract DCAManager is IDCAManager {
             investment.tokenIn
         );
 
-console.log("DCA tokenInAmount: %s", tokenInAmount);
+        console.log("DCA tokenInAmount: %s", tokenInAmount);
 
         require(
             IERC20(investment.tokenIn).transferFrom(
