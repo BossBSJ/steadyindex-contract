@@ -11,7 +11,7 @@ class ERC20Service {
             baseURL: "https://deep-index.moralis.io/api/v2",
             headers: {
                 Accept: "application/json", 
-                "X-API-Key": "euw3Dt8w7JM1ohFU1TKGmhofy3TvjxP1q38xapOU3U2w6TLs1n3aYS4WMuoTEkT1"
+                "X-API-Key": process.env.MORALIS_API_KEY
             }
         })
     }
